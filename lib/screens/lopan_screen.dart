@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'dart:math';
-import 'dart:ui'; // For blur effect
+import 'dart:ui';
 
 class LopanScreen extends StatefulWidget {
   const LopanScreen({Key? key}) : super(key: key);
@@ -27,19 +27,22 @@ class _LopanScreenState extends State<LopanScreen> {
       if (event != null && event.heading != null) {
         setState(() {
           _heading = event.heading;
-          _smoothedHeading = _applyLowPassFilter(_smoothedHeading, _heading! % 360);
+          // Normalize to 0-360 range
+          double normalizedHeading = _heading! % 360;
+          if (normalizedHeading < 0) normalizedHeading += 360;
+          _smoothedHeading = _applyLowPassFilter(_smoothedHeading, normalizedHeading);
+          // Ensure smoothed heading stays in 0-360 range
+          _smoothedHeading = _smoothedHeading % 360;
+          if (_smoothedHeading < 0) _smoothedHeading += 360;
         });
       }
     });
   }
 
   double _applyLowPassFilter(double previousValue, double newValue) {
-    double delta = newValue - previousValue;
-    if (delta > 180) {
-      delta -= 360;
-    } else if (delta < -180) {
-      delta += 360;
-    }
+    // Calculate shortest path difference considering circular nature
+    double diff = newValue - previousValue;
+    double delta = diff - 360 * (diff / 360).round();
     return previousValue + _smoothingFactor * delta;
   }
 
@@ -54,16 +57,16 @@ class _LopanScreenState extends State<LopanScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: null, // Remove the title from here. It will be added to the body
+        title: null,
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          // Full-screen background image
+          // Background image
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/bg.jpg'), // Path to your bg.jpg
+                image: AssetImage('assets/images/bg.jpg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -71,26 +74,24 @@ class _LopanScreenState extends State<LopanScreen> {
 
           // Blur overlay
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Adjust blur intensity
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.3), // Adjust opacity for the blur effect
-            ),
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: Container(color: Colors.black.withOpacity(0.3)),
           ),
 
-          // Main Content
+          // Main content
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                SizedBox(height: kToolbarHeight + 80), // Add more space to avoid overlap with HomeScreen menu
+                SizedBox(height: kToolbarHeight + 50),
                 _buildTitle(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 0),
                 Expanded(
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Zoomable Lopan Image with Double-Tap-to-Reset
+                        // Lopan image with inverse rotation
                         GestureDetector(
                           onDoubleTap: _resetZoom,
                           child: ClipRect(
@@ -102,7 +103,7 @@ class _LopanScreenState extends State<LopanScreen> {
                                 minScale: 0.5,
                                 maxScale: 4.0,
                                 child: Transform.rotate(
-                                  angle: (_smoothedHeading) * (pi / 180),
+                                  angle: -_smoothedHeading * (pi / 180), // Inverse rotation
                                   child: Image.asset(
                                     'assets/images/lopanhd.png',
                                     width: 300,
@@ -113,18 +114,22 @@ class _LopanScreenState extends State<LopanScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 30),
-                        // Align the two text widgets horizontally
+                        const SizedBox(height: 50),
+                        // Degree and mountain display
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _buildGlassMorphismButton(
                               Text(
                                 'បែទៅដឺក្រេ: ${_smoothedHeading.toStringAsFixed(2)}°',
-                                style: const TextStyle(fontSize: 14, fontFamily: 'Dangrek', color: Colors.white),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Dangrek',
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 10), // Add spacing between the two text widgets
+                            const SizedBox(width: 10),
                             if (_heading != null) _buildMountainLabel(_smoothedHeading),
                           ],
                         ),
@@ -140,64 +145,64 @@ class _LopanScreenState extends State<LopanScreen> {
     );
   }
 
-  // Helper method to build the mountain label
   Widget _buildMountainLabel(double heading) {
     final mountains = [
-      MountainRange('ជើង1: Ren (壬)', 337.6, 352.5),
-      MountainRange('ជើង2: Zi (子)', 352.6, 7.5),
-      MountainRange('ជើង3: Gui (癸)', 7.6, 22.5),
-      MountainRange('ត្បូង1: Bing (丙)', 157.6, 172.5),
-      MountainRange('ត្បូង2: Wu (午)', 172.6, 187.5),
-      MountainRange('ត្បូង3: Ding (丁)', 187.6, 202.5),
-      MountainRange('កើត1: Jia (甲)', 67.6, 82.5),
-      MountainRange('កើត2: Mao (卯)', 82.6, 97.5),
-      MountainRange('កើត3: Yi (乙)', 97.6, 112.5),
-      MountainRange('លិច1: Geng (庚)', 247.6, 262.5),
-      MountainRange('លិច2: You (酉)', 262.6, 277.5),
-      MountainRange('លិច3: Xin (辛)', 277.6, 292.5),
-      MountainRange('ជើងឈាងកើត1: Zhen (震)', 22.6, 37.5),
-      MountainRange('ជើងឈាងកើត2: Gen (艮)', 37.6, 52.5),
-      MountainRange('ជើងឈាងកើត3: Chen (辰)', 52.6, 67.5),
-      MountainRange('ត្បូងឈាងកើត1: Si (巳)', 112.6, 127.5),
-      MountainRange('ត្បូងឈាងកើត2: Xun (巽)', 127.6, 142.5),
-      MountainRange('ត្បូងឈាងកើត3: Wu (午)', 142.6, 157.5),
-      MountainRange('ត្បូងឈាងលិច1: Kun (坤)', 202.6, 217.5),
-      MountainRange('ត្បូងឈាងលិច2: Kun (坤)', 217.6, 232.5),
-      MountainRange('ត្បូងឈាងលិច3: Wei (未)', 232.6, 247.5),
-      MountainRange('ជើងឈាងលិច1: Qian (乾)', 292.6, 307.5),
-      MountainRange('ជើងឈាងលិច2: Qian (乾)', 307.6, 322.5),
-      MountainRange('ជើងឈាងលិច3: Xu (戌)', 322.6, 337.5),
+      MountainRange('N2: Zi (子)', 352.5, 7.5),
+      MountainRange('N3: Gui (癸)', 7.5, 22.5),
+      MountainRange('NE1: Chou (丑)', 22.5, 37.5),
+      MountainRange('NE2: Gen (艮)', 37.5, 52.5),
+      MountainRange('NE3: Yin (寅)', 52.5, 67.5),
+      MountainRange('E1: Jia (甲)', 67.5, 82.5),
+      MountainRange('E2: Mao (卯)', 82.5, 97.5),
+      MountainRange('E3: Yi (乙)', 97.5, 112.5),
+      MountainRange('SE1: Chen (辰)', 112.5, 127.5),
+      MountainRange('SE2: Xun (巽)', 127.5, 142.5),
+      MountainRange('SE3: Si (巳)', 142.5, 157.5),
+      MountainRange('S1: Bing (丙)', 157.5, 172.5),
+      MountainRange('S2: Wu (午)', 172.5, 187.5),
+      MountainRange('S3: Ding (丁)', 187.5, 202.5),
+      MountainRange('SW1: Wei (未)', 202.5, 217.5),
+      MountainRange('SW2: Kun (坤)', 217.5, 232.5),
+      MountainRange('SW3: Shen (申)', 232.5, 247.5),
+      MountainRange('W1: Geng (庚)', 247.5, 262.5),
+      MountainRange('W2: You (酉)', 262.5, 277.5),
+      MountainRange('W3: Xin (辛)', 277.5, 292.5),
+      MountainRange('NW1: Xu (戌)', 292.5, 307.5),
+      MountainRange('NW2: Qian (乾)', 307.5, 322.5),
+      MountainRange('NW3: Hai (亥)', 322.5, 337.5),
+      MountainRange('N1: Ren (壬)', 337.5, 352.5),
     ];
 
-    // Find the mountain corresponding to the current heading
     final currentMountain = mountains.firstWhere(
           (mountain) => _isHeadingInRange(heading, mountain.startDegree, mountain.endDegree),
-      orElse: () => MountainRange('ផុតដង្ហើម', 0, 0), // Default if no mountain is found
+      orElse: () => MountainRange('ផុតដង្ហើម', 0, 0),
     );
 
     return _buildGlassMorphismButton(
       Text(
         currentMountain.label,
-        style: const TextStyle(fontSize: 14, fontFamily: 'Dangrek', fontWeight: FontWeight.bold, color: Colors.white),
+        style: const TextStyle(
+          fontSize: 14,
+          fontFamily: 'Dangrek',
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
     );
   }
 
-  // Helper method to check if the heading is within a range
   bool _isHeadingInRange(double heading, double startDegree, double endDegree) {
     if (startDegree > endDegree) {
-      // Handle wrap-around ranges (e.g., 352.6° to 7.5°)
       return heading >= startDegree || heading <= endDegree;
     } else {
       return heading >= startDegree && heading <= endDegree;
     }
   }
 
-  // Helper method to create a glass morphism button
   Widget _buildGlassMorphismButton(Widget child) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8), // Reduced padding
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: const Color.fromRGBO(255, 255, 255, 0.2),
         borderRadius: BorderRadius.circular(20),
@@ -207,19 +212,18 @@ class _LopanScreenState extends State<LopanScreen> {
     );
   }
 
-  // Build Custom Title with Blur Glass Morphism
   Widget _buildTitle() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12), // Rounded corners
+      borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Blur effect
+        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.yellowAccent.withValues(alpha: 0.3), // Semi-transparent white
+            color: Colors.yellowAccent.withOpacity(0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3), // Light border
+              color: Colors.white.withOpacity(0.3),
               width: 2.2,
             ),
           ),
@@ -227,7 +231,7 @@ class _LopanScreenState extends State<LopanScreen> {
             'ឡកែ ដង្ហើមនាគ ម៉ាស្ទ័រអែល',
             style: TextStyle(
               fontFamily: 'Dangrek',
-              fontSize: 20, // Reduced font size
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -238,7 +242,6 @@ class _LopanScreenState extends State<LopanScreen> {
   }
 }
 
-// Helper class to represent a mountain range
 class MountainRange {
   final String label;
   final double startDegree;

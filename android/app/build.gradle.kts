@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "www.masterelf.vip.masterelf"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -29,8 +29,6 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
-    ndkVersion = "27.0.12077973" // Add this line
 
     buildTypes {
         release {

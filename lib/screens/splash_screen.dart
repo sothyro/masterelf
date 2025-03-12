@@ -116,7 +116,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final earthlyBranch = lunarDateObj.getDayZhi(); // Get the Earthly Branch of the day
     final index = _getEarthlyBranchIndex(earthlyBranch); // Get the index of the Earthly Branch
     twelveGods = twelveGodsCycle[index]; // Get the 12 Gods for today
-    twelveGodsEnglishTranslation = twelveGodsEnglishMap[twelveGods] ?? 'ទេវតាបិតភ្នែក'; // Get the English translation
+    twelveGodsEnglishTranslation = twelveGodsEnglishMap[twelveGods] ?? 'ទេវតាបិទភ្នែក'; // Get the English translation
 
     // Determine day quality based on 12 Gods
     final goodGods = ['建', '除', '满', '平', '定', '执', '成', '收', '開'];
@@ -192,11 +192,12 @@ class _SplashScreenState extends State<SplashScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'ថ្ងៃនេះជា $dayQuality',
+                              'ថ្ងៃនេះជា $dayQuality $twelveGods $twelveGodsEnglishTranslation',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Dangrek',
-                                fontSize: 22,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(width: 8),
@@ -214,9 +215,25 @@ class _SplashScreenState extends State<SplashScreen> {
                         SizedBox(height: 8),
                         _buildLabel('តួរាសី ឆ្នាំ: ', yearPillar, _getPillarKhmer(yearPillar)),
                         SizedBox(height: 8),
-                        _buildLabel('ដំណឹងទេវតា១២: ', twelveGods, twelveGodsEnglishTranslation),
-                        SizedBox(height: 8),
-                        _buildLabel('ថ្ងៃច័ន្ទគតិ: ', lunarDate),
+                        //_buildLabel('ថ្ងៃនេះជា $dayQuality', twelveGods, twelveGodsEnglishTranslation),
+                        Text(
+                          '©️2025 ក្រុមហ៊ុន ម៉ាស្ទ័អេលហ្វឹងស៊ុយ Master Elf 风水 ™️',
+                          style: TextStyle(
+                            color: Colors.orangeAccent,
+                            fontFamily: 'Dangrek',
+                            fontSize: 11,
+                          ),
+                        ),
+                        Text(
+                          'សរសេរដោយ STONECHAT COMMUNICATIONS',
+                          style: TextStyle(
+                            color: Colors.orangeAccent,
+                            fontFamily: 'Dangrek',
+                            fontSize: 11,
+                          ),
+                        ),
+                        //SizedBox(height: 8),
+                        //_buildLabel("Powered by: Stonechat Communications. ©️2025"), //_buildLabel('ថ្ងៃច័ន្ទគតិ: ', lunarDate),
                       ],
                     ),
                   ),
