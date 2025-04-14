@@ -1,14 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
-import 'package:lottie/lottie.dart';
 import 'dart:ui'; // For ImageFilter
 
+import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:video_player/video_player.dart';
+
 class PrayScreen extends StatefulWidget {
+  const PrayScreen({super.key});
+
   @override
-  _PrayScreenState createState() => _PrayScreenState();
+  createState() => _PrayScreenState(); // Dart automatically infers State<PrayScreen>
 }
 
-class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateMixin {
+class _PrayScreenState extends State<PrayScreen>
+    with SingleTickerProviderStateMixin {
   late VideoPlayerController _controller;
   bool _isLoading = true;
   bool _isAnimationCompleted = false;
@@ -53,18 +57,20 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
     });
 
     _controller = VideoPlayerController.asset(_videoUrls[0])
-      ..initialize().then((_) {
-        setState(() {
-          _isLoading = false;
-        });
-        _controller.play();
-        _controller.setLooping(true); // Loop the default video
-      }).catchError((error) {
-        setState(() {
-          _isLoading = false;
-        });
-        print("Error loading default video: $error");
-      });
+      ..initialize()
+          .then((_) {
+            setState(() {
+              _isLoading = false;
+            });
+            _controller.play();
+            _controller.setLooping(true); // Loop the default video
+          })
+          .catchError((error) {
+            setState(() {
+              _isLoading = false;
+            });
+            //print("Error loading default video: $error");
+          });
 
     // Listen for video completion
     _controller.addListener(_onVideoCompletion);
@@ -75,7 +81,8 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
 
   // Handle video completion
   void _onVideoCompletion() {
-    if (_controller.value.position >= _controller.value.duration && !_controller.value.isLooping) {
+    if (_controller.value.position >= _controller.value.duration &&
+        !_controller.value.isLooping) {
       // If the video is not looping and has finished, switch back to the default video
       _replaceVideo(_videoUrls[0]);
     }
@@ -90,7 +97,8 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
       _playLottieAnimation(); // Play the Lottie animation when buffering starts
     } else if (!_controller.value.isBuffering && _isBuffering) {
       setState(() {
-        _isBuffering = false; // Hide Lottie animation when buffering is complete
+        _isBuffering =
+            false; // Hide Lottie animation when buffering is complete
       });
     }
   }
@@ -111,23 +119,32 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
     await _controller.dispose(); // Dispose the previous controller
 
     if (videoSource.startsWith('http')) {
-      _controller = VideoPlayerController.network(videoSource); // Load network video
+      _controller = VideoPlayerController.networkUrl(
+        Uri.parse(videoSource),
+      ); // Load network video
     } else {
-      _controller = VideoPlayerController.asset(videoSource); // Load asset video
+      _controller = VideoPlayerController.asset(
+        videoSource,
+      ); // Load asset video
     }
 
-    _controller.initialize().then((_) {
-      setState(() {
-        _isLoading = false;
-      });
-      _controller.play();
-      _controller.setLooping(videoSource == _videoUrls[0]); // Loop only the default video
-    }).catchError((error) {
-      setState(() {
-        _isLoading = false;
-      });
-      print("Error loading video: $error");
-    });
+    _controller
+        .initialize()
+        .then((_) {
+          setState(() {
+            _isLoading = false;
+          });
+          _controller.play();
+          _controller.setLooping(
+            videoSource == _videoUrls[0],
+          ); // Loop only the default video
+        })
+        .catchError((error) {
+          setState(() {
+            _isLoading = false;
+          });
+          //print("Error loading video: $error");
+        });
 
     // Listen for video completion
     _controller.addListener(_onVideoCompletion);
@@ -161,10 +178,7 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
         children: [
           // Background Image
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/ybg.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/ybg.jpg', fit: BoxFit.cover),
           ),
 
           // Video Player (only shown after Lottie animation completes and not buffering)
@@ -205,10 +219,10 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
                 child: Container(
                   width: 120.0,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       width: 1.0,
                     ),
                   ),
@@ -225,7 +239,7 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
                         child: Container(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            'បំណងព្រះ',
+                            'រៀបពិធី',
                             style: TextStyle(
                               fontFamily: 'Dangrek',
                               fontSize: 18.0,
@@ -253,11 +267,15 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
                             },
                             child: Container(
                               width: double.infinity,
-                              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal: 12.0,
+                              ),
                               decoration: BoxDecoration(
-                                color: _selectedIndex == index
-                                    ? Colors.yellow.withOpacity(0.3)
-                                    : Colors.transparent,
+                                color:
+                                    _selectedIndex == index
+                                        ? Colors.yellow.withValues(alpha: 0.3)
+                                        : Colors.transparent,
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
                               child: Text(
@@ -271,7 +289,7 @@ class _PrayScreenState extends State<PrayScreen> with SingleTickerProviderStateM
                               ),
                             ),
                           );
-                        }).toList(),
+                        }),
                     ],
                   ),
                 ),

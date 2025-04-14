@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'screens/splash_screen.dart'; // Import the SplashScreen
 
 void main() {
@@ -6,13 +7,13 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ហុងស៊ុយ Master Elf',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      title: 'ហុងស៊ុយ Master Elf 风水',
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: SplashScreen(), // Set SplashScreen as the initial route
     );
   }

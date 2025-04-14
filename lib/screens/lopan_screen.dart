@@ -1,20 +1,28 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_compass/flutter_compass.dart';
 import 'dart:math';
 import 'dart:ui';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/rendering.dart';
 
 class LopanScreen extends StatefulWidget {
-  const LopanScreen({Key? key}) : super(key: key);
+  const LopanScreen({super.key});
 
   @override
-  _LopanScreenState createState() => _LopanScreenState();
+  createState() => _LopanScreenState();
 }
 
 class _LopanScreenState extends State<LopanScreen> {
   double? _heading;
   double _smoothedHeading = 0.0;
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+  TransformationController();
   final double _smoothingFactor = 0.1;
+  bool _isLocked = false;
+  bool _useAlternateImage = false;
+  final GlobalKey _compassKey = GlobalKey(); //_compassKey = GlobalKey();
 
   @override
   void initState() {
@@ -24,13 +32,16 @@ class _LopanScreenState extends State<LopanScreen> {
 
   void _startCompass() {
     FlutterCompass.events?.listen((CompassEvent? event) {
-      if (event != null && event.heading != null) {
+      if (event != null && event.heading != null && !_isLocked) {
         setState(() {
           _heading = event.heading;
           // Normalize to 0-360 range
           double normalizedHeading = _heading! % 360;
           if (normalizedHeading < 0) normalizedHeading += 360;
-          _smoothedHeading = _applyLowPassFilter(_smoothedHeading, normalizedHeading);
+          _smoothedHeading = _applyLowPassFilter(
+            _smoothedHeading,
+            normalizedHeading,
+          );
           // Ensure smoothed heading stays in 0-360 range
           _smoothedHeading = _smoothedHeading % 360;
           if (_smoothedHeading < 0) _smoothedHeading += 360;
@@ -48,6 +59,58 @@ class _LopanScreenState extends State<LopanScreen> {
 
   void _resetZoom() {
     _transformationController.value = Matrix4.identity();
+  }
+
+  Future<void> _takeScreenshot() async {
+    try {
+      // Find the render object
+      final renderObject = _compassKey.currentContext?.findRenderObject();
+      if (renderObject == null || renderObject is! RenderRepaintBoundary) {
+        throw Exception('Could not find render boundary');
+      }
+
+      // Capture the image
+      final boundary = renderObject; //as RenderRepaintBoundary
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      if (byteData == null) {
+        throw Exception('Could not capture image bytes');
+      }
+
+      // Save to temporary file
+      final directory = await getApplicationDocumentsDirectory();
+      final imagePath = await File('${directory.path}/compass_screenshot.png')
+          .writeAsBytes(byteData.buffer.asUint8List());
+
+      // Share the image
+      await Share.shareXFiles([XFile(imagePath.path)],
+          text: 'Check out my compass direction!');
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to take screenshot: $e')),
+      );
+    }
+  }
+
+  void _toggleLock() {
+    setState(() {
+      _isLocked = !_isLocked;
+    });
+  }
+
+  void _toggleImage() {
+    setState(() {
+      _useAlternateImage = !_useAlternateImage;
+    });
+  }
+
+  void _calibrateCompass() {
+    setState(() {
+      _smoothedHeading = _heading ?? _smoothedHeading;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Compass calibrated!')),
+      );
+    });
   }
 
   @override
@@ -75,7 +138,7 @@ class _LopanScreenState extends State<LopanScreen> {
           // Blur overlay
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-            child: Container(color: Colors.black.withOpacity(0.3)),
+            child: Container(color: Colors.black.withValues(alpha:0.3)),
           ),
 
           // Main content
@@ -89,32 +152,57 @@ class _LopanScreenState extends State<LopanScreen> {
                 Expanded(
                   child: Center(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         // Lopan image with inverse rotation
-                        GestureDetector(
-                          onDoubleTap: _resetZoom,
-                          child: ClipRect(
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: InteractiveViewer(
-                                transformationController: _transformationController,
-                                boundaryMargin: const EdgeInsets.all(double.infinity),
-                                minScale: 0.5,
-                                maxScale: 4.0,
-                                child: Transform.rotate(
-                                  angle: -_smoothedHeading * (pi / 180), // Inverse rotation
-                                  child: Image.asset(
-                                    'assets/images/lopanhd.png',
-                                    width: 300,
-                                    height: 300,
+                        RepaintBoundary(
+                          key: _compassKey,
+                          child: GestureDetector(
+                            onDoubleTap: _resetZoom,
+                            child: ClipRect(
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: InteractiveViewer(
+                                  transformationController:
+                                  _transformationController,
+                                  boundaryMargin: const EdgeInsets.all(
+                                    double.infinity,
+                                  ),
+                                  minScale: 0.5,
+                                  maxScale: 4.0,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // Compass overlay (behind the image)
+                                      Transform.rotate(
+                                        angle: -_smoothedHeading * (pi / 180),
+                                        child: SizedBox( //Container(
+                                          width: 350, // Larger than image
+                                          height: 350, // Larger than image
+                                          child: CustomPaint(
+                                            painter: CompassRosePainter(),
+                                          ),
+                                        ),
+                                      ),
+                                      // Lopan image (on top)
+                                      Transform.rotate(
+                                        angle: -_smoothedHeading * (pi / 180),
+                                        child: Image.asset(
+                                          _useAlternateImage
+                                              ? 'assets/images/lopanhd2.png'
+                                              : 'assets/images/lopanhd.png',
+                                          width: 250,
+                                          height: 250,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 50),
+                        const SizedBox(height: 10),
                         // Degree and mountain display
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -130,7 +218,70 @@ class _LopanScreenState extends State<LopanScreen> {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            if (_heading != null) _buildMountainLabel(_smoothedHeading),
+                            if (_heading != null)
+                              _buildMountainLabel(_smoothedHeading),
+                          ],
+                        ),
+                        const SizedBox(height: 0),
+                        // New buttons side by side
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: _takeScreenshot,
+                              child: _buildGlassMorphismButton(
+                                Text(
+                                  'ថត📷',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Dangrek',
+                                    color: Colors.yellowAccent,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            GestureDetector(
+                              onTap: _toggleLock,
+                              child: _buildGlassMorphismButton(
+                                Text(
+                                  _isLocked ? 'ដក🔓' : 'ចាក់🔒',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Dangrek',
+                                    color: Colors.yellowAccent,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            GestureDetector(
+                              onTap: _toggleImage,
+                              child: _buildGlassMorphismButton(
+                                Text(
+                                  'ប្តូរ🥏',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Dangrek',
+                                    color: Colors.yellowAccent,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            GestureDetector(
+                              onTap: _calibrateCompass,
+                              child: _buildGlassMorphismButton(
+                                Text(
+                                  'ជួយ♾️',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Dangrek',
+                                    color: Colors.yellowAccent,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -147,34 +298,35 @@ class _LopanScreenState extends State<LopanScreen> {
 
   Widget _buildMountainLabel(double heading) {
     final mountains = [
-      MountainRange('N2: Zi (子)', 352.5, 7.5),
-      MountainRange('N3: Gui (癸)', 7.5, 22.5),
-      MountainRange('NE1: Chou (丑)', 22.5, 37.5),
-      MountainRange('NE2: Gen (艮)', 37.5, 52.5),
-      MountainRange('NE3: Yin (寅)', 52.5, 67.5),
-      MountainRange('E1: Jia (甲)', 67.5, 82.5),
-      MountainRange('E2: Mao (卯)', 82.5, 97.5),
-      MountainRange('E3: Yi (乙)', 97.5, 112.5),
-      MountainRange('SE1: Chen (辰)', 112.5, 127.5),
-      MountainRange('SE2: Xun (巽)', 127.5, 142.5),
-      MountainRange('SE3: Si (巳)', 142.5, 157.5),
-      MountainRange('S1: Bing (丙)', 157.5, 172.5),
-      MountainRange('S2: Wu (午)', 172.5, 187.5),
-      MountainRange('S3: Ding (丁)', 187.5, 202.5),
-      MountainRange('SW1: Wei (未)', 202.5, 217.5),
-      MountainRange('SW2: Kun (坤)', 217.5, 232.5),
-      MountainRange('SW3: Shen (申)', 232.5, 247.5),
-      MountainRange('W1: Geng (庚)', 247.5, 262.5),
-      MountainRange('W2: You (酉)', 262.5, 277.5),
-      MountainRange('W3: Xin (辛)', 277.5, 292.5),
-      MountainRange('NW1: Xu (戌)', 292.5, 307.5),
-      MountainRange('NW2: Qian (乾)', 307.5, 322.5),
-      MountainRange('NW3: Hai (亥)', 322.5, 337.5),
-      MountainRange('N1: Ren (壬)', 337.5, 352.5),
+      MountainRange('ជើងN2: Zi (子)', 352.5, 7.5),
+      MountainRange('ជើងN3: Gui (癸)', 7.5, 22.5),
+      MountainRange('ជើង/កើតNE1: Chou (丑)', 22.5, 37.5),
+      MountainRange('ជើង/កើតNE2: Gen (艮)', 37.5, 52.5),
+      MountainRange('ជើង/កើតNE3: Yin (寅)', 52.5, 67.5),
+      MountainRange('កើតE1: Jia (甲)', 67.5, 82.5),
+      MountainRange('កើតE2: Mao (卯)', 82.5, 97.5),
+      MountainRange('កើតE3: Yi (乙)', 97.5, 112.5),
+      MountainRange('ត្បូង/កើតSE1: Chen (辰)', 112.5, 127.5),
+      MountainRange('ត្បូង/កើតSE2: Xun (巽)', 127.5, 142.5),
+      MountainRange('ត្បូង/កើតSE3: Si (巳)', 142.5, 157.5),
+      MountainRange('ត្បូងS1: Bing (丙)', 157.5, 172.5),
+      MountainRange('ត្បូងS2: Wu (午)', 172.5, 187.5),
+      MountainRange('ត្បូងS3: Ding (丁)', 187.5, 202.5),
+      MountainRange('ត្បូង/លិចSW1: Wei (未)', 202.5, 217.5),
+      MountainRange('ត្បូង/លិចSW2: Kun (坤)', 217.5, 232.5),
+      MountainRange('ត្បូង/លិចSW3: Shen (申)', 232.5, 247.5),
+      MountainRange('លិចW1: Geng (庚)', 247.5, 262.5),
+      MountainRange('លិចW2: You (酉)', 262.5, 277.5),
+      MountainRange('លិចW3: Xin (辛)', 277.5, 292.5),
+      MountainRange('ជើង/លិចNW1: Xu (戌)', 292.5, 307.5),
+      MountainRange('ជើង/លិចNW2: Qian (乾)', 307.5, 322.5),
+      MountainRange('ជើង/លិខNW3: Hai (亥)', 322.5, 337.5),
+      MountainRange('ជើងN1: Ren (壬)', 337.5, 352.5),
     ];
 
     final currentMountain = mountains.firstWhere(
-          (mountain) => _isHeadingInRange(heading, mountain.startDegree, mountain.endDegree),
+          (mountain) =>
+          _isHeadingInRange(heading, mountain.startDegree, mountain.endDegree),
       orElse: () => MountainRange('ផុតដង្ហើម', 0, 0),
     );
 
@@ -220,10 +372,10 @@ class _LopanScreenState extends State<LopanScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.yellowAccent.withOpacity(0.3),
+            color: Colors.yellowAccent.withValues(alpha:0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha:0.3),
               width: 2.2,
             ),
           ),
@@ -248,4 +400,114 @@ class MountainRange {
   final double endDegree;
 
   MountainRange(this.label, this.startDegree, this.endDegree);
+}
+
+class CompassRosePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 * 0.85; // Reduced ring size
+
+    // Draw the compass circle
+    final circlePaint = Paint()
+      ..color = Colors.white.withValues(alpha:0.3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    canvas.drawCircle(center, radius * 0.9, circlePaint);
+
+    // Draw cardinal directions
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+
+    // Swapped directions: N ↔ W, S ↔ E
+    const cardinalDirections = ['E', 'ត្បូង', 'W', 'ជើង'];
+    const intercardinalDirections = ['SE', '西南', 'NW', '東北'];
+
+    // Draw cardinal directions (W, S, E, N)
+    for (int i = 0; i < 4; i++) {
+      final angle = i * pi / 2;
+      final direction = cardinalDirections[i];
+
+      // Draw the main cardinal direction line
+      final linePaint = Paint()
+        ..color = direction == 'N'
+            ? Colors.red.withValues(alpha:0.7)
+            : direction == 'S'
+            ? Colors.purple.withValues(alpha:0.7)
+            : Colors.white.withValues(alpha:0.7)
+        ..strokeWidth = 2.0;
+
+      final x = center.dx + cos(angle) * radius * 0.7;
+      final y = center.dy + sin(angle) * radius * 0.7;
+      canvas.drawLine(center, Offset(x, y), linePaint);
+
+      // Draw the cardinal direction text (outside the ring)
+      textPainter.text = TextSpan(
+        text: direction,
+        style: TextStyle(
+          color: direction == 'ជើង'
+              ? Colors.redAccent
+              : direction == 'ត្បូង'
+              ? Colors.deepPurpleAccent
+              : Colors.white,
+          fontSize: 22,
+          fontFamily: 'Dangrek',
+          fontWeight: FontWeight.bold,
+        ),
+      );
+      textPainter.layout();
+
+      final textX = center.dx + cos(angle) * radius * 1.02 -
+          textPainter.width / 2;
+      final textY = center.dy + sin(angle) * radius * 1.02 -
+          textPainter.height / 2;
+      textPainter.paint(canvas, Offset(textX, textY));
+    }
+
+    // Draw intercardinal directions (SW, SE, NE, NW)
+    for (int i = 0; i < 4; i++) {
+      final angle = (i * 2 + 1) * pi / 4;
+      final direction = intercardinalDirections[i];
+
+      // Draw the intercardinal direction text (outside the ring)
+      textPainter.text = TextSpan(
+        text: direction,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha:0.8),
+          fontSize: 14,
+        ),
+      );
+      textPainter.layout();
+
+      final textX = center.dx + cos(angle) * radius * 1.1 -
+          textPainter.width / 2;
+      final textY = center.dy + sin(angle) * radius * 1.1 -
+          textPainter.height / 2;
+      textPainter.paint(canvas, Offset(textX, textY));
+    }
+
+    // Draw degree markings (without numbers)
+    final degreePaint = Paint()
+      ..color = Colors.white.withValues(alpha:0.6)
+      ..strokeWidth = 1.0;
+
+    for (int i = 0; i < 360; i += 5) {
+      final angle = i * pi / 180;
+      final innerRadius = i % 15 == 0 ? radius * 0.85 : radius * 0.88;
+      final outerRadius = i % 15 == 0 ? radius * 0.95 : radius * 0.92;
+
+      final x1 = center.dx + cos(angle) * innerRadius;
+      final y1 = center.dy + sin(angle) * innerRadius;
+      final x2 = center.dx + cos(angle) * outerRadius;
+      final y2 = center.dy + sin(angle) * outerRadius;
+
+      canvas.drawLine(Offset(x1, y1), Offset(x2, y2), degreePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

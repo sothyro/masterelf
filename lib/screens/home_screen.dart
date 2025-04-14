@@ -1,36 +1,67 @@
-import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
-import 'bazi_page.dart'; // Import the Bazi page
-import 'dateselection_screen.dart'; // Import the DateSelection screen
-import 'lopan_screen.dart'; // Import the Lopan screen
-import 'talisman_screen.dart'; // Import the Talisman screen
-import 'pray_screen.dart'; // Import the Pray screen
+import 'package:flutter/material.dart';
+
+import 'about_screen.dart'; // Add this import
+import 'web_screen.dart';
+import 'bazi_page.dart';
+import 'dateselection_screen.dart';
+import 'lopan_screen.dart';
+import 'pray_screen.dart';
+import 'talisman_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  int _selectedIndex = 2; // Default selected index for Date Selection
+  int _selectedIndex = 2;
   late AnimationController _animationController;
   late Animation<double> _animation;
+  OverlayEntry? _overlayEntry;
+  String? _currentOpenMenu; // Track which menu is currently open
 
-  // List of pages for navigation
   final List<Widget> _pages = [
-    PrayScreen(), // Pray page
-    BaziPage(), // Bazi page (contains the Bazi Calculator UI)
-    DateSelectionScreen(), // DateSelection page
-    LopanScreen(), // Lopan page
-    TalismanScreen(), // Talisman page
+    PrayScreen(),
+    BaziPage(),
+    DateSelectionScreen(),
+    LopanScreen(),
+    TalismanScreen(),
+    AboutScreen(),
   ];
+
+  final Map<String, List<String>> _dropdownItems = {
+    '🔥ហុងស៊ុយថ្មីៗ': ['វីដេអូ·Vlogs', 'ហុងស៊ុយឆ្នាំថ្មី', 'សៀវភៅយុគ្គ9'],
+    '🧧មើលលាភហេង': ['តារាសាស្ត្រ·飞星', 'ទ្វារវាសនា·奇门', 'អ៊ីជីង·易經'],
+    '☯️ម៉ាស្ទ័រអេល': ['ទំនាក់ទំនង', 'ណាត់ជួបម៉ាស្ទ័រ', 'សិក្ខាសាលា'],
+  };
+
+  final Map<String, String> _itemUrls = {
+    'វីដេអូ·Vlogs': 'https://masterelf.vip/vlogs/',
+    'ហុងស៊ុយឆ្នាំថ្មី': 'https://masterelf.vip/yearly/',
+    'សៀវភៅយុគ្គ9': 'https://masterelf.vip/period9/',
+    'តារាសាស្ត្រ·飞星': 'https://masterelf.vip/xuankong/',
+    'ទ្វារវាសនា·奇门': 'https://masterelf.vip/qimen/',
+    'អ៊ីជីង·易經': 'https://masterelf.vip/iching/',
+    'ណាត់ជួបម៉ាស្ទ័រ': 'https://masterelf.vip/appointment/',
+    'សិក្ខាសាលា': 'https://masterelf.vip/event/',
+    //'ទំនាក់ទំនង': 'https://masterelf.vip/contact/',
+  };
+
+  final Map<String, GlobalKey> _buttonKeys = {
+    '🔥ហុងស៊ុយថ្មីៗ': GlobalKey(),
+    '🧧មើលលាភហេង': GlobalKey(),
+    '☯️ម៉ាស្ទ័រអេល': GlobalKey(),
+  };
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Update the selected index
-      _animationController.reset(); // Reset the animation
-      _animationController.repeat(reverse: true); // Start the animation loop
+      _selectedIndex = index;
+      _animationController.reset();
+      _animationController.repeat(reverse: true);
     });
   }
 
@@ -43,7 +74,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
     _animation = Tween<double>(begin: 1.0, end: 1.2).animate(_animationController);
 
-    // Start the animation for the default selected item
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.repeat(reverse: true);
     });
@@ -52,7 +82,107 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _removeOverlay();
     super.dispose();
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+    _currentOpenMenu = null;
+  }
+
+  void _showMenuOverlay(BuildContext context, String text) {
+    // If clicking the same button that's already open, close it
+    if (_currentOpenMenu == text) {
+      _removeOverlay();
+      return;
+    }
+
+    // Otherwise, remove any existing overlay and show the new one
+    _removeOverlay();
+    _currentOpenMenu = text;
+
+    final buttonKey = _buttonKeys[text]!;
+    final renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox;
+    final buttonSize = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        left: offset.dx,
+        top: offset.dy + buttonSize.height + 5,
+        child: Material(
+          color: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                width: buttonSize.width,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _dropdownItems[text]!.map((item) {
+                    return InkWell(
+                      onTap: () {
+                        _removeOverlay();
+                        // Special case for 'ទំនាក់ទំនង'
+                        if (item == 'ទំនាក់ទំនង') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AboutScreen(),
+                            ),
+                          );
+                        }
+                        // For all other items that have URLs
+                        else if (_itemUrls.containsKey(item)) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => WebScreen(url: _itemUrls[item]!),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: _dropdownItems[text]!.last == item
+                                ? BorderSide.none
+                                : BorderSide(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1),
+                          ),
+                        ),
+                        child: Text(
+                          item,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'Dangrek',
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(_overlayEntry!);
   }
 
   @override
@@ -60,39 +190,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image with Blur Effect
           _buildBackground(),
-          // Display the selected page
           _pages[_selectedIndex],
-          // Centered Menu Buttons at the Top
           Align(
-            alignment: Alignment.topCenter, // Align to the top center
+            alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.only(top: 50), // Adjust top padding as needed
+              padding: const EdgeInsets.only(top: 50),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Center the buttons horizontally
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildMenuButton('យុគ្គ៩🔥九运', () {
-                    // Add functionality for the About button
-                    print('About button pressed');
-                  }),
-                  SizedBox(width: 10), // Add spacing between buttons
-                  _buildMenuButton('ហុងស៊ុយ🧧风水', () {
-                    // Add functionality for the Decor button
-                    print('Decor button pressed');
-                  }),
-                  SizedBox(width: 10), // Add spacing between buttons
-                  _buildMenuButton('☯️ ជួបម៉ាស្ទ័រ', () {
-                    // Add functionality for the More button
-                    print('More button pressed');
-                  }),
+                  _buildMenuButton('🔥ហុងស៊ុយថ្មីៗ'),
+                  const SizedBox(width: 10),
+                  _buildMenuButton('🧧មើលលាភហេង'),
+                  const SizedBox(width: 10),
+                  _buildMenuButton('☯️ម៉ាស្ទ័រអេល'),
                 ],
               ),
             ),
           ),
         ],
       ),
-      extendBody: true, // Extend the body to cover the bottom navigation bar
+      extendBody: true,
       bottomNavigationBar: ClipRRect(
         child: BackdropFilter(
           filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -100,18 +218,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.5),
+                  color: Colors.grey.withValues(alpha:0.5),
                   spreadRadius: 5,
                   blurRadius: 10,
-                  offset: Offset(0, 3), // Adjust the offset as needed
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
             child: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white.withValues(alpha: 0.4),
-              currentIndex: _selectedIndex, // Highlight the selected button
-              onTap: _onItemTapped, // Handle button taps
+              backgroundColor: Colors.white.withValues(alpha:0.4),
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
               items: [
                 _buildBottomNavItem('assets/icons/pray.png', 'ពិធី', 0),
                 _buildBottomNavItem('assets/icons/bazi.png', 'បាជឺ', 1),
@@ -119,19 +237,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 _buildBottomNavItem('assets/icons/lopan.png', 'ឡកែ', 3),
                 _buildBottomNavItem('assets/icons/talisman.png', 'យ័ន្ត', 4),
               ],
-              selectedItemColor: _getSelectedItemColor(_selectedIndex), // Dynamically select color
-              unselectedItemColor: Colors.black, // Color for unselected items
-              unselectedLabelStyle: TextStyle(
-                fontFamily: 'Dangrek', // Apply font family
-                color: Colors.black, // Ensure labels are readable
-                fontSize: 16, // Increase font size
+              selectedItemColor: _getSelectedItemColor(_selectedIndex),
+              unselectedItemColor: Colors.black,
+              unselectedLabelStyle: const TextStyle(
+                fontFamily: 'Dangrek',
+                color: Colors.black,
+                fontSize: 16,
               ),
               selectedLabelStyle: TextStyle(
-                fontFamily: 'Dangrek', // Apply font family
-                color: _getSelectedItemColor(_selectedIndex), // Ensure selected label matches the item color
-                fontSize: 16, // Increase font size
+                fontFamily: 'Dangrek',
+                color: _getSelectedItemColor(_selectedIndex),
+                fontSize: 16,
               ),
-              // Increase the height of the navigation bar
               selectedFontSize: 16,
               unselectedFontSize: 16,
             ),
@@ -141,25 +258,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // Build Background with Blur Effect
   Widget _buildBackground() {
     return Container(
-      decoration: const BoxDecoration(
+        decoration: const BoxDecoration(
         image: DecorationImage(
-          image: AssetImage('assets/images/bg.jpg'), // Add your image to assets
-          fit: BoxFit.cover,
+        image: AssetImage('assets/images/bg.jpg'),
+    fit: BoxFit.cover,
+    ),
+    ),
+    child: BackdropFilter(
+    filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+    child: Container(color: Colors.black.withValues(alpha:0.4)),
+    ));
+  }
+
+  Widget _buildMenuButton(String text) {
+    return ElevatedButton(
+      key: _buttonKeys[text],
+      onPressed: () => _showMenuOverlay(context, text),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white.withValues(alpha:0.7),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       ),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5), // Blur effect
-        child: Container(
-          color: Colors.black.withValues(alpha: 0.4),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Dangrek',
         ),
       ),
     );
   }
 
-  BottomNavigationBarItem _buildBottomNavItem(String imagePath, String label, int index) {
+  BottomNavigationBarItem _buildBottomNavItem(
+      String imagePath, String label, int index) {
     return BottomNavigationBarItem(
       icon: AnimatedBuilder(
         animation: _animation,
@@ -171,35 +308,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 boxShadow: _selectedIndex == index
                     ? [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.5),
+                    color: Colors.grey.withValues(alpha:0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(0, 2), // Adjust the offset as needed
+                    offset: const Offset(0, 2),
                   ),
                   BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withValues(alpha:0.5),
                     spreadRadius: -2,
                     blurRadius: 5,
-                    offset: Offset(0, -2), // Adjust the offset as needed
+                    offset: const Offset(0, -2),
                   ),
                 ]
                     : [
                   BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withValues(alpha:0.5),
                     spreadRadius: -2,
                     blurRadius: 5,
-                    offset: Offset(0, -2), // Adjust the offset as needed
+                    offset: const Offset(0, -2),
                   ),
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.5),
+                    color: Colors.grey.withValues(alpha:0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
-                    offset: Offset(0, 2), // Adjust the offset as needed
+                    offset: const Offset(0, 2),
                   ),
                 ],
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Image.asset(imagePath, width: 32, height: 32), // Increase icon size
+              child: Image.asset(
+                imagePath,
+                width: 32,
+                height: 32,
+              ),
             ),
           );
         },
@@ -208,44 +349,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // Function to get the selected item color based on the index
   Color _getSelectedItemColor(int index) {
     switch (index) {
       case 0:
-        return Colors.yellow; // For 'បាជឺ'
+        return Colors.yellow;
       case 1:
-        return Colors.red; // For 'វេលាមង្គល'
+        return Colors.red;
       case 2:
-        return Colors.deepPurpleAccent; // For 'ឡកែ'
+        return Colors.deepPurpleAccent;
       case 3:
-        return Colors.yellowAccent; // For 'យ័ន្ត'
+        return Colors.yellowAccent;
       case 4:
-        return Colors.tealAccent; // For 'បួងសួង'
+        return Colors.tealAccent;
       default:
-        return Colors.red; // Default color if index is not matched
+        return Colors.red;
     }
-  }
-
-  // Function to build a menu button
-  Widget _buildMenuButton(String text, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white.withValues(alpha: 0.7),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Rounded corners
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Button padding
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.black, // Text color
-          fontSize: 12, // Text size
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Dangrek', // Apply font family
-        ),
-      ),
-    );
   }
 }

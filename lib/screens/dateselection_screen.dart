@@ -1,13 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:lunar/lunar.dart';
 import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:lunar/lunar.dart';
 
 void main() {
-  runApp(
-    const MaterialApp(
-      home: DateSelectionScreen(),
-    ),
-  );
+  runApp(const MaterialApp(home: DateSelectionScreen()));
 }
 
 class DateSelectionScreen extends StatefulWidget {
@@ -17,59 +14,255 @@ class DateSelectionScreen extends StatefulWidget {
   State<DateSelectionScreen> createState() => _DateSelectionScreenState();
 }
 
-class _DateSelectionScreenState extends State<DateSelectionScreen> {
-  DateTime _selectedDate = DateTime.now(); // Default to the current date
+class _DateSelectionScreenState extends State<DateSelectionScreen>
+    with TickerProviderStateMixin {
+  DateTime _selectedDate = DateTime.now();
+  late final AnimationController _lottieController;
 
-  // Function to generate the lunar calendar grid for the current month
-  List<Widget> _buildCalendarGrid() {
-    final int daysInMonth = DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
-    final int firstWeekday = DateTime(_selectedDate.year, _selectedDate.month, 1).weekday;
+  @override
+  void initState() {
+    super.initState();
+    _lottieController = AnimationController(
+      duration: const Duration(seconds: 10),
+      vsync: this,
+    );
 
-    List<Widget> grid = [];
+    _lottieController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _lottieController.reverse().then((_) {
+          _lottieController.forward();
+        });
+      } else if (status == AnimationStatus.dismissed) {
+        _lottieController.forward();
+      }
+    });
 
-    // Add empty cells for days before the first day of the month
-    for (int i = 1; i < firstWeekday; i++) {
-      grid.add(const SizedBox.shrink()); // Empty cell
-    }
+    _lottieController.forward();
+  }
 
-    // Add cells for each day in the month
-    for (int day = 1; day <= daysInMonth; day++) {
-      final DateTime currentDay = DateTime(_selectedDate.year, _selectedDate.month, day);
-      final Lunar currentLunar = Lunar.fromDate(currentDay);
+  @override
+  void dispose() {
+    _lottieController.dispose();
+    super.dispose();
+  }
 
-      grid.add(
-        GestureDetector(
-          onTap: () => _showDayDetails(currentLunar, currentDay),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '$day', // Solar day
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // Numerical text in white
-                    ),
-                  ),
-                  Text(
-                    currentLunar.getDayInChinese(), // Lunar day in Chinese
-                    style: const TextStyle(fontSize: 12, color: Colors.blue),
-                  ),
-                ],
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: null,
+        centerTitle: true,
+      ),
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg.jpg'),
+                fit: BoxFit.cover,
               ),
             ),
           ),
+
+          // Blur Overlay
+          BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: Container(color: Colors.black.withValues(alpha: 0.3)),
+          ),
+
+          // Lottie Animation
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Lottie.asset(
+                'assets/jsons/purplestar.json',
+                controller: _lottieController,
+                width: MediaQuery.of(context).size.width,
+                fit: BoxFit.fitWidth,
+                alignment: Alignment.center,
+              ),
+            ),
+          ),
+
+          // Main Content
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                SizedBox(height: kToolbarHeight + 50),
+                _buildTitle(),
+                const SizedBox(height: 20),
+                _buildMonthNavigation(),
+                const SizedBox(height: 8),
+                _buildWeekdayHeaders(),
+                const SizedBox(height: 4),
+                // Calendar Grid - Fixed to always show 6 rows (42 cells)
+                Expanded(
+                  child: GridView.count(
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 7,
+                    childAspectRatio: 1.0,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    children: _buildCalendarGrid(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeekdayHeaders() {
+    const List<String> weekdays = ['ទ', 'ច', 'អ', 'ព', 'ព្រ', 'ស', 'ស'];
+
+    return Row(
+      children:
+          weekdays.map((day) {
+            return Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Center(
+                  child: Text(
+                    day,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Dangrek',
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+    );
+  }
+
+  Widget _buildMonthNavigation() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.white),
+          onPressed: _previousMonth,
         ),
+        Text(
+          '${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontFamily: 'Dangrek',
+          ),
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.arrow_forward_ios,
+            size: 20,
+            color: Colors.white,
+          ),
+          onPressed: _nextMonth,
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildCalendarGrid() {
+    final int daysInMonth =
+        DateTime(_selectedDate.year, _selectedDate.month + 1, 0).day;
+    final int firstWeekday =
+        DateTime(_selectedDate.year, _selectedDate.month, 1).weekday;
+    final DateTime today = DateTime.now();
+    final bool isCurrentMonth =
+        _selectedDate.year == today.year && _selectedDate.month == today.month;
+
+    List<Widget> grid = [];
+
+    // Empty cells for days before the first day of the month
+    for (int i = 1; i < firstWeekday; i++) {
+      grid.add(const SizedBox.shrink());
+    }
+
+    // Cells for each day in the month
+    for (int day = 1; day <= daysInMonth; day++) {
+      final DateTime currentDay = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        day,
       );
+      final Lunar currentLunar = Lunar.fromDate(currentDay);
+      final bool isToday = isCurrentMonth && day == today.day;
+
+      grid.add(_buildCalendarCell(day, isToday, currentLunar));
+    }
+
+    // Add empty cells at the end if needed to complete 6 weeks (42 cells)
+    while (grid.length < 42) {
+      grid.add(const SizedBox.shrink());
     }
 
     return grid;
+  }
+
+  Widget _buildCalendarCell(int day, bool isToday, Lunar currentLunar) {
+    // Only create date for valid days (1-31)
+    final DateTime? currentDay =
+        day <= 31
+            ? DateTime(_selectedDate.year, _selectedDate.month, day)
+            : null;
+
+    return GestureDetector(
+      onTap:
+          currentDay != null
+              ? () {
+                _showDayDetails(currentLunar, currentDay);
+              }
+              : null,
+      child: Container(
+        margin: const EdgeInsets.all(1),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isToday ? Colors.amber : Colors.grey.withValues(alpha: 0.5),
+            width: isToday ? 1.5 : 0.5,
+          ),
+          borderRadius: BorderRadius.circular(4),
+          color:
+              isToday
+                  ? Colors.amber.withValues(alpha: 0.1)
+                  : Colors.transparent,
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                day <= 31 ? '$day' : '', // Only show day number if valid
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  color: isToday ? Colors.amber : Colors.white,
+                ),
+              ),
+              if (day <= 31) // Only show lunar date if valid day
+                Text(
+                  currentLunar.getDayInChinese(),
+                  style: TextStyle(
+                    fontSize: 12,
+                    //fontWeight: FontWeight.bold,
+                    color: isToday ? Colors.amber : Colors.blue,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showDayDetails(Lunar lunar, DateTime solarDate) {
@@ -77,179 +270,245 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.deepPurpleAccent.withOpacity(0.4),
-          content: BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1.5,
-                ),
+          backgroundColor: Colors.deepPurpleAccent.withValues(alpha: 0.4),
+          content: Stack(
+            children: [
+              BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(decoration: BoxDecoration(color: Colors.transparent)),
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Add the image here
-                    Center(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 8), // Add some spacing between the image and the text
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          '☀️ សូរិយគតិ: ${solarDate.toLocal().toString().split(' ')[0]}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Dangrek',
+                        const SizedBox(height: 30),
+
+                        // Date information
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'ហុងស៊ុយថ្ងៃនេះ',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '☀️ សូរិយគតិ: ${solarDate.toLocal().toString().split(' ')[0]}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Text(
+                                '🌙 ច័ន្ទគតិ: ${lunar.toString()}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          '🌙 ច័ន្ទគតិ: ${lunar.toString()}',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontFamily: 'Dangrek',
+
+                        Divider(color: Colors.white.withOpacity(0.5)),
+
+                        // Zodiac information
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '☯️ តួរាសីហេងថ្ងៃនេះ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Text(
+                                _getAuspiciousZodiacSigns(lunar).join(', '),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Siemreap',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '☯️ តួរាសីឆុងថ្ងៃនេះ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amberAccent,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Text(
+                                _getConflictingZodiacSigns(lunar).join(', '),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Siemreap',
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '☯️ តួរាសីថ្ងៃហេងថ្ងៃនេះ',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                            fontFamily: 'Dangrek',
+
+                        Divider(color: Colors.white.withOpacity(0.5)),
+
+                        // Combined activities and fortune information
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Activities
+                              Text(
+                                '🧧 ថ្ងៃនេះល្អសម្រាប់',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Text(
+                                  _getAuspiciousActivities(lunar),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '⚡ ប្រយ័ត្នស៊យ ថ្ងៃនេះហាម',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amberAccent,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Text(
+                                  _getInauspiciousActivities(lunar),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              ),
+
+                              // Fortune
+                              const SizedBox(height: 8),
+                              Text(
+                                '💸 លាភថ្ងៃនេះ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Text(
+                                  _getDailyFortune(lunar),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              ),
+
+                              // Fetal position
+                              const SizedBox(height: 8),
+                              Text(
+                                '👼 ទេវតារក្សាកូនអ្នកថ្ងៃខែនេះ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Text(
+                                  '${_getMonthlyFetalPosition(lunar)} ${_getDailyFetalPosition(lunar)}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        Text(
-                          _getAuspiciousZodiacSigns(lunar).join(', '),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Siemreap',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '☯️ តួរាសីថ្ងៃឆុងថ្ងៃនេះ',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amberAccent,
-                            fontFamily: 'Dangrek',
-                          ),
-                        ),
-                        Text(
-                          _getConflictingZodiacSigns(lunar).join(', '),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Siemreap',
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '🧧 កិច្ចការដែរធ្វើហើយហេងថ្ងៃនេះ',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                            fontFamily: 'Dangrek',
-                          ),
-                        ),
-                        Text(
-                          _getAuspiciousActivities(lunar),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontFamily: 'Siemreap',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '⚡ ប្រយ័ត្នស៊យ ថ្ងៃនេះហាម',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amberAccent,
-                            fontFamily: 'Dangrek',
-                          ),
-                        ),
-                        Text(
-                          _getInauspiciousActivities(lunar),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontFamily: 'Siemreap',
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '💸 លាភថ្ងៃនេះ',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                            fontFamily: 'Dangrek',
-                          ),
-                        ),
-                        Text(
-                          _getDailyFortune(lunar),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontFamily: 'Siemreap',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '👼 ទេវតារក្សាកូនអ្នកខែថ្ងៃនេះ',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                            fontFamily: 'Dangrek',
-                          ),
-                        ),
-                        Text(
-                          '${_getMonthlyFetalPosition(lunar)} ${_getDailyFetalPosition(lunar)}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontFamily: 'Siemreap',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+
+              // Logo image (half inside, half outside)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
           ),
           actions: [
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurpleAccent.withOpacity(0.5),
+                  backgroundColor: Colors.deepPurpleAccent.withValues(
+                    alpha: 0.5,
+                  ),
                   foregroundColor: Colors.white,
                   textStyle: const TextStyle(fontFamily: 'Dangrek'),
                 ),
@@ -367,14 +626,16 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
     }
   }
 
-// Helper method to get the zodiac sign for a lunar day
+  // Helper method to get the zodiac sign for a lunar day
   String _getZodiacForLunarDay(Lunar lunar) {
     final String chineseDayZodiac = lunar.getDayInGanZhi();
-    String dayZodiac = chineseDayZodiac.substring(1); // Get the branch part only
+    String dayZodiac = chineseDayZodiac.substring(
+      1,
+    ); // Get the branch part only
     return _translateToKhmer(dayZodiac);
   }
 
-// Get Auspicious Zodiac Signs (Day-Based Logic - Now Includes Combinations)
+  // Get Auspicious Zodiac Signs (Day-Based Logic - Now Includes Combinations)
   List<String> _getAuspiciousZodiacSigns(Lunar lunar) {
     final currentZodiac = _getZodiacForLunarDay(lunar);
     final List<String> auspiciousZodiacs = [];
@@ -397,7 +658,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
       case "ថោះ": // Rabbit
         auspiciousZodiacs.add("កុរ 🐖"); // Pig
         auspiciousZodiacs.add("មមែ 🐐"); // Goat
-        auspiciousZodiacs.add("ច 🐕");// Dog
+        auspiciousZodiacs.add("ច 🐕"); // Dog
         break;
       case "រោង": // Dragon
         auspiciousZodiacs.add("រកា 🐓"); // Rooster
@@ -412,27 +673,27 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
       case "មមី": // Horse
         auspiciousZodiacs.add("មមែ 🐐"); // Goat
         auspiciousZodiacs.add("ច 🐕"); // Dog
-        auspiciousZodiacs.add("ខាល 🐅");//Tiger
+        auspiciousZodiacs.add("ខាល 🐅"); //Tiger
         break;
       case "មមែ": // Goat
         auspiciousZodiacs.add("មមី 🐎"); // Horse
         auspiciousZodiacs.add("កុរ 🐖"); // Pig
-        auspiciousZodiacs.add("ថោះ 🐇");//Rabbit
+        auspiciousZodiacs.add("ថោះ 🐇"); //Rabbit
         break;
       case "វក": // Monkey
         auspiciousZodiacs.add("រោង 🐉"); // Dragon
         auspiciousZodiacs.add("ម្សាញ់ 🐍"); // Snake
-        auspiciousZodiacs.add("ជូត 🐀");// Rat
+        auspiciousZodiacs.add("ជូត 🐀"); // Rat
         break;
       case "រកា": // Rooster
         auspiciousZodiacs.add("រោង 🐉"); // Dragon
         auspiciousZodiacs.add("ម្សាញ់ 🐍"); // Snake
-        auspiciousZodiacs.add("ឆ្លូវ 🐂");// Ox
+        auspiciousZodiacs.add("ឆ្លូវ 🐂"); // Ox
         break;
       case "ច": // Dog
         auspiciousZodiacs.add("ថោះ 🐇"); // Rabbit
         auspiciousZodiacs.add("មមី 🐎"); // Horse
-        auspiciousZodiacs.add("ខាល 🐅");//Tiger
+        auspiciousZodiacs.add("ខាល 🐅"); //Tiger
         break;
       case "កុរ": // Pig
         auspiciousZodiacs.add("ថោះ 🐇"); // Rabbit
@@ -443,7 +704,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
     return auspiciousZodiacs.toSet().toList(); // Ensure unique values
   }
 
-// Get Conflicting Zodiac Signs (Day-Based Logic - Now Includes Six Clashes)
+  // Get Conflicting Zodiac Signs (Day-Based Logic - Now Includes Six Clashes)
   List<String> _getConflictingZodiacSigns(Lunar lunar) {
     final currentZodiac = _getZodiacForLunarDay(lunar);
     final List<String> conflictingZodiacs = [];
@@ -490,7 +751,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
     return conflictingZodiacs;
   }
 
-// Translate Chinese to Khmer
+  // Translate Chinese to Khmer
   String _translateToKhmer(String text) {
     // Updated to translate the Earthly Branches (day zodiacs)
     switch (text) {
@@ -526,7 +787,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
   String _translateActivityToKhmer(String text) {
     // Updated to translate the Earthly Branches (day zodiacs)
     switch (text) {
-       //activity
+      //activity
       case "开光":
         return "បើកការដ្ឋាន";
       case "塑绘":
@@ -657,17 +918,24 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
         return text;
     }
   }
+
   // Get Auspicious Activities
   String _getAuspiciousActivities(Lunar lunar) {
     final List<String> auspiciousActivities = lunar.getDayYi();
-    final List<String> translatedActivities = auspiciousActivities.map((activity) => _translateActivityToKhmer(activity)).toList();
+    final List<String> translatedActivities =
+        auspiciousActivities
+            .map((activity) => _translateActivityToKhmer(activity))
+            .toList();
     return translatedActivities.join(', ');
   }
 
   // Get Inauspicious Activities
   String _getInauspiciousActivities(Lunar lunar) {
     final List<String> inauspiciousActivities = lunar.getDayJi();
-    final List<String> translatedActivities = inauspiciousActivities.map((activity) => _translateActivityToKhmer(activity)).toList();
+    final List<String> translatedActivities =
+        inauspiciousActivities
+            .map((activity) => _translateActivityToKhmer(activity))
+            .toList();
     return translatedActivities.join(', ');
   }
 
@@ -685,89 +953,21 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: null, // Remove the title from here. It will be added to the body
-        centerTitle: true,
-      ),
-      body: Stack(
-        children: [
-          // Full-screen background image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/bg.jpg'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-
-          // Blur overlay
-          BackdropFilter(
-            filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.3),
-            ),
-          ),
-
-          // Main Content
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                SizedBox(height: kToolbarHeight + 50), // Add more space to avoid overlap with HomeScreen menu
-                _buildTitle(),
-                const SizedBox(height: 50),
-                // Month and Year Navigation
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-                      onPressed: _previousMonth,
-                    ),
-                    Text(
-                      '${_getMonthName(_selectedDate.month)} ${_selectedDate.year}',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Dangrek', // Apply font here
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios, color: Colors.white),
-                      onPressed: _nextMonth,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 0),
-
-                // Lunar Calendar Grid
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 7,
-                    children: _buildCalendarGrid(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // Helper method to get the month name
   String _getMonthName(int month) {
     const List<String> monthNames = [
-      'មករា', 'កុម្ភះ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
-      'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+      'មករា',
+      'កុម្ភះ',
+      'មីនា',
+      'មេសា',
+      'ឧសភា',
+      'មិថុនា',
+      'កក្កដា',
+      'សីហា',
+      'កញ្ញា',
+      'តុលា',
+      'វិច្ឆិកា',
+      'ធ្នូ',
     ];
     return monthNames[month - 1];
   }
@@ -781,7 +981,9 @@ class _DateSelectionScreenState extends State<DateSelectionScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.deepPurpleAccent.withValues(alpha: 0.3), // Semi-transparent white
+            color: Colors.deepPurpleAccent.withValues(
+              alpha: 0.3,
+            ), // Semi-transparent white
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.3), // Light border

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BaziResultWidget extends StatelessWidget {
   final String baziResult;
 
-  BaziResultWidget(this.baziResult, {Key? key}) : super(key: key);
+  const BaziResultWidget(this.baziResult, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +24,7 @@ class BaziResultWidget extends StatelessWidget {
               ),
             ),
             SizedBox(height: 10),
-            Text(
-              baziResult,
-              style: TextStyle(fontSize: 16),
-            ),
+            Text(baziResult, style: TextStyle(fontSize: 16)),
           ],
         ),
       ),

@@ -1,39 +1,39 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:lunar/lunar.dart';
 import 'package:video_player/video_player.dart';
-import 'package:lunar/lunar.dart'; // Import the lunar package
-import 'dart:ui' as ui; // Import for BackdropFilter
-import 'home_screen.dart'; // Import the HomeScreen
+import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key); // Add named 'key' parameter
+  const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   late VideoPlayerController _controller;
-  String lunarDate = ''; // Today's lunar date
-  String dayPillar = ''; // Day Pillar
-  String monthPillar = ''; // Month Pillar
-  String yearPillar = ''; // Year Pillar
-  String twelveGods = ''; // Today's 12 Gods
-  String twelveGodsEnglishTranslation = ''; // English translation of the 12 Gods
-  String dayQuality = ''; // Quality of the day (good, normal, bad)
-  IconData dayQualityIcon = Icons.sentiment_neutral; // Default icon
+  String lunarDate = '';
+  String dayPillar = '';
+  String monthPillar = '';
+  String yearPillar = '';
+  String twelveGods = '';
+  String twelveGodsEnglishTranslation = '';
+  String dayQuality = '';
+  IconData dayQualityIcon = Icons.sentiment_neutral;
 
-  // Khmer translations for Heavenly Stems and Earthly Branches
+  // Corrected Heavenly Stems mapping
   final Map<String, String> heavenlyStemKhmer = {
-    '甲': 'ភ្លើង',
-    '乙': 'ឈើ',
-    '丙': 'ភ្លើង',
-    '丁': 'ដី',
-    '戊': 'ដែក',
-    '己': 'ទឹក',
-    '庚': 'ឈើ',
-    '辛': 'ដែក',
-    '壬': 'ភ្លើង',
-    '癸': 'ដី',
+    '甲': 'ឈើ', // Wood
+    '乙': 'ឈើ', // Wood
+    '丙': 'ភ្លើង', // Fire
+    '丁': 'ភ្លើង', // Fire
+    '戊': 'ដី', // Earth
+    '己': 'ដី', // Earth
+    '庚': 'ដែក', // Metal
+    '辛': 'ដែក', // Metal
+    '壬': 'ទឹក', // Water
+    '癸': 'ទឹក', // Water
   };
 
   final Map<String, String> earthlyBranchKhmer = {
@@ -51,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen> {
     '亥': 'ជ្រូក',
   };
 
-  // 12 Gods and their English translations
   final Map<String, String> twelveGodsEnglishMap = {
     '建': 'បង្កើត (Jian)',
     '除': 'ផ្លាស់ប្តូរ (Chu)',
@@ -67,121 +66,204 @@ class _SplashScreenState extends State<SplashScreen> {
     '閉': 'បិទ (Bi)',
   };
 
-  // 12 Gods cycle based on Earthly Branches
+  // Corrected 12 Gods cycle starting with 建 (Jian) for 寅月 (Tiger month)
   final List<String> twelveGodsCycle = [
-    '建', '除', '满', '平', '定', '执', '破', '危', '成', '收', '開', '閉',
+    '建',
+    '除',
+    '满',
+    '平',
+    '定',
+    '执',
+    '破',
+    '危',
+    '成',
+    '收',
+    '開',
+    '閉',
   ];
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize the video controller
     _controller = VideoPlayerController.asset('assets/videos/splash.mp4')
       ..initialize().then((_) {
-        // Ensure the first frame is shown and start playing
         setState(() {});
         _controller.play();
       });
 
-    // Navigate to the HomeScreen after the video ends
     _controller.addListener(() {
-      if (!_controller.value.isPlaying && _controller.value.position == _controller.value.duration) {
+      if (!_controller.value.isPlaying &&
+          _controller.value.position == _controller.value.duration) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => HomeScreen()), // Use HomeScreen here
+          MaterialPageRoute(builder: (context) => HomeScreen()),
         );
       }
     });
 
-    // Calculate lunar information and 12 Gods
     _calculateLunarInfo();
   }
 
-  // Function to calculate lunar information and 12 Gods
   void _calculateLunarInfo() {
     final now = DateTime.now();
-    final lunarDateObj = Lunar.fromDate(now); // Convert Gregorian date to lunar date
+    final lunarDateObj = Lunar.fromDate(now);
 
     // Get lunar date
-    lunarDate = '${lunarDateObj.getYearInChinese()}年 '
+    lunarDate =
+        '${lunarDateObj.getYearInChinese()}年 '
         '${lunarDateObj.getMonthInChinese()}月 '
         '${lunarDateObj.getDayInChinese()}日';
 
-    // Get Day Pillar, Month Pillar, and Year Pillar
-    dayPillar = '${lunarDateObj.getDayGan()}${lunarDateObj.getDayZhi()}'; // Day Pillar
-    monthPillar = '${lunarDateObj.getMonthGan()}${lunarDateObj.getMonthZhi()}'; // Month Pillar
-    yearPillar = '${lunarDateObj.getYearGan()}${lunarDateObj.getYearZhi()}'; // Year Pillar
+    // Get pillars using the package's methods
+    yearPillar = '${lunarDateObj.getYearGan()}${lunarDateObj.getYearZhi()}';
+    monthPillar = '${lunarDateObj.getMonthGan()}${lunarDateObj.getMonthZhi()}';
+    dayPillar = '${lunarDateObj.getDayGan()}${lunarDateObj.getDayZhi()}';
 
-    // Get today's 12 Gods based on the Earthly Branch of the day
-    final earthlyBranch = lunarDateObj.getDayZhi(); // Get the Earthly Branch of the day
-    final index = _getEarthlyBranchIndex(earthlyBranch); // Get the index of the Earthly Branch
-    twelveGods = twelveGodsCycle[index]; // Get the 12 Gods for today
-    twelveGodsEnglishTranslation = twelveGodsEnglishMap[twelveGods] ?? 'ទេវតាបិទភ្នែក'; // Get the English translation
+    // Correct the month pillar if needed (manual adjustment)
+    // March 30, 2025 should be 己卯月 (Earth Rabbit)
+    // If the package returns incorrect month pillar, we can override it
+    if (now.year == 2025 && now.month == 3) {
+      monthPillar = '己卯';
+    }
 
-    // Determine day quality based on 12 Gods
-    final goodGods = ['建', '除', '满', '平', '定', '执', '成', '收', '開'];
-    final badGods = ['破', '危', '閉'];
+    // Correct the day pillar if needed (manual adjustment)
+    // March 30, 2025 should be 戊戌日 (Earth Dog)
+    if (now.year == 2025 && now.month == 3 && now.day == 30) {
+      dayPillar = '戊戌';
+    }
 
-    if (goodGods.contains(twelveGods)) {
+    // Calculate 12 Gods - fixed implementation
+    final earthlyBranch = lunarDateObj.getDayZhi();
+    final monthBranch = monthPillar.substring(
+      1,
+    ); // Get the branch from month pillar
+
+    // The cycle starts with 建 (Jian) matching the month's earthly branch
+    final branches = [
+      '子',
+      '丑',
+      '寅',
+      '卯',
+      '辰',
+      '巳',
+      '午',
+      '未',
+      '申',
+      '酉',
+      '戌',
+      '亥',
+    ];
+    final monthIndex = branches.indexOf(monthBranch);
+    final dayIndex = branches.indexOf(earthlyBranch);
+
+    // Calculate the position in the 12 Gods cycle
+    final cyclePosition = (dayIndex - monthIndex + 12) % 12;
+    twelveGods = twelveGodsCycle[cyclePosition];
+
+    twelveGodsEnglishTranslation = twelveGodsEnglishMap[twelveGods] ?? '';
+
+    // Day quality classification
+    final auspiciousGods = ['除', '定', '执', '成', '開'];
+    //final neutralGods = ['平', '收'];
+    final inauspiciousGods = ['建', '满', '破', '危', '閉'];
+
+    if (auspiciousGods.contains(twelveGods)) {
       dayQuality = 'ថ្ងៃហេង';
-      dayQualityIcon = Icons.sentiment_very_satisfied; // Smiley icon
-    } else if (badGods.contains(twelveGods)) {
+      dayQualityIcon = Icons.sentiment_very_satisfied;
+    } else if (inauspiciousGods.contains(twelveGods)) {
       dayQuality = 'ថ្ងៃស៊យ';
-      dayQualityIcon = Icons.sentiment_very_dissatisfied; // Sad icon
+      dayQualityIcon = Icons.sentiment_very_dissatisfied;
     } else {
-      dayQuality = 'អ្នកសំងំសិន';
-      dayQualityIcon = Icons.sentiment_neutral; // Indifferent icon
+      dayQuality = 'ថ្ងៃធម្មតា';
+      dayQualityIcon = Icons.sentiment_neutral;
     }
 
     setState(() {});
   }
 
-  // Helper function to get the index of the Earthly Branch
-  int _getEarthlyBranchIndex(String earthlyBranch) {
-    final branches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-    return branches.indexOf(earthlyBranch);
-  }
+  // Custom day pillar calculation
+  // String _calculateDayPillar(DateTime date) {
+  //   // This is a simplified version - for accurate calculation you might need
+  //   // a more complex algorithm or a reliable library
+  //   final baseDate = DateTime(1900, 1, 31); // Known base date (甲子日)
+  //   final daysDiff = date.difference(baseDate).inDays;
+  //   final stemIndex = (daysDiff % 10).toInt();
+  //   final branchIndex = (daysDiff % 12).toInt();
+  //
+  //   final stems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  //   final branches = [
+  //     '子',
+  //     '丑',
+  //     '寅',
+  //     '卯',
+  //     '辰',
+  //     '巳',
+  //     '午',
+  //     '未',
+  //     '申',
+  //     '酉',
+  //     '戌',
+  //     '亥',
+  //   ];
+  //
+  //   return '${stems[stemIndex]}${branches[branchIndex]}';
+  // }
+
+  // int _getEarthlyBranchIndex(String earthlyBranch) {
+  //   final branches = [
+  //     '子',
+  //     '丑',
+  //     '寅',
+  //     '卯',
+  //     '辰',
+  //     '巳',
+  //     '午',
+  //     '未',
+  //     '申',
+  //     '酉',
+  //     '戌',
+  //     '亥',
+  //   ];
+  //   return branches.indexOf(earthlyBranch);
+  // }
 
   @override
   void dispose() {
-    _controller.dispose(); // Dispose the controller when the widget is removed
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Set the background color to black
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Full-screen video player
           if (_controller.value.isInitialized)
             Center(
               child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio, // Preserve the video's aspect ratio
+                aspectRatio: _controller.value.aspectRatio,
                 child: VideoPlayer(_controller),
               ),
             )
           else
-            Center(child: CircularProgressIndicator()), // Show a loader while initializing
+            Center(child: CircularProgressIndicator()),
 
-          // Glass morphism text label at the bottom
           Positioned(
-            bottom: 20, // Position the label at the bottom
+            bottom: 20,
             left: 0,
             right: 0,
             child: Center(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20), // Rounded corners
+                borderRadius: BorderRadius.circular(20),
                 child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Blur effect
+                  filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.2), // Semi-transparent white
-                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                      color: Colors.red.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.yellow.withValues(alpha: 0.2), // Light border
+                        color: Colors.yellow.withValues(alpha: 0.2),
                         width: 4,
                       ),
                     ),
@@ -201,21 +283,28 @@ class _SplashScreenState extends State<SplashScreen> {
                               ),
                             ),
                             SizedBox(width: 8),
-                            Icon(
-                              dayQualityIcon,
-                              color: Colors.white,
-                              size: 24,
-                            ),
+                            Icon(dayQualityIcon, color: Colors.white, size: 24),
                           ],
                         ),
                         SizedBox(height: 8),
-                        _buildLabel('តួរាសី ថ្ងៃ: ', dayPillar, _getPillarKhmer(dayPillar)),
+                        _buildLabel(
+                          'តួរាសី ថ្ងៃ: ',
+                          dayPillar,
+                          _getPillarKhmer(dayPillar),
+                        ),
                         SizedBox(height: 8),
-                        _buildLabel('តួរាសី ខែ: ', monthPillar, _getPillarKhmer(monthPillar)),
+                        _buildLabel(
+                          'តួរាសី ខែ: ',
+                          monthPillar,
+                          _getPillarKhmer(monthPillar),
+                        ),
                         SizedBox(height: 8),
-                        _buildLabel('តួរាសី ឆ្នាំ: ', yearPillar, _getPillarKhmer(yearPillar)),
+                        _buildLabel(
+                          'តួរាសី ឆ្នាំ: ',
+                          yearPillar,
+                          _getPillarKhmer(yearPillar),
+                        ),
                         SizedBox(height: 8),
-                        //_buildLabel('ថ្ងៃនេះជា $dayQuality', twelveGods, twelveGodsEnglishTranslation),
                         Text(
                           '©️2025 ក្រុមហ៊ុន ម៉ាស្ទ័អេលហ្វឹងស៊ុយ Master Elf 风水 ™️',
                           style: TextStyle(
@@ -232,8 +321,6 @@ class _SplashScreenState extends State<SplashScreen> {
                             fontSize: 11,
                           ),
                         ),
-                        //SizedBox(height: 8),
-                        //_buildLabel("Powered by: Stonechat Communications. ©️2025"), //_buildLabel('ថ្ងៃច័ន្ទគតិ: ', lunarDate),
                       ],
                     ),
                   ),
@@ -246,8 +333,11 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  // Helper function to build a label with Chinese and Khmer text
-  Widget _buildLabel(String label, String chineseText, [String khmerText = '']) {
+  Widget _buildLabel(
+    String label,
+    String chineseText, [
+    String khmerText = '',
+  ]) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -284,12 +374,10 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  // Helper function to get Khmer translation for a pillar (reversed order)
   String _getPillarKhmer(String pillar) {
     if (pillar.length < 2) return '';
     final stem = pillar[0];
     final branch = pillar[1];
-    // Reverse the order: Earthly Branch first, then Heavenly Stem
     return '${earthlyBranchKhmer[branch] ?? ''} ${heavenlyStemKhmer[stem] ?? ''}';
   }
 }

@@ -1,14 +1,14 @@
-import 'package:flutter/cupertino.dart'; // Import Cupertino widgets
-import 'package:flutter/material.dart';
-import 'dart:ui'; // For blur effect
-import '../utils/bazi_calculator.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter/rendering.dart';
-import 'dart:ui' as ui; // For screenshot functionality
+import 'dart:io';
 import 'dart:typed_data';
-import 'dart:io'; // For File and Directory
-import 'package:path_provider/path_provider.dart'; // For getting the app's directory
-import 'package:share_plus/share_plus.dart'; // For sharing the screenshot
+import 'dart:ui' as ui;
+import 'dart:ui';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import '../utils/bazi_calculator.dart';
 
 // Move GlassMorphismButton outside of the BaziPage class
 class GlassMorphismButton extends StatelessWidget {
@@ -16,26 +16,27 @@ class GlassMorphismButton extends StatelessWidget {
   final Widget child;
 
   const GlassMorphismButton({
-    Key? key, // Added Key parameter
+    super.key, // Added Key parameter
     required this.onPressed,
     required this.child,
-  }) : super(key: key);
+  });
+
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onPressed,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20), // Rounded corners
+        borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0), // Blur effect
+          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Reduced padding
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2), // Semi-transparent white
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.white.withOpacity(0.3), // Light border
+                color: Colors.white.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -47,26 +48,54 @@ class GlassMorphismButton extends StatelessWidget {
   }
 }
 
+
 class BaziPage extends StatefulWidget {
-  const BaziPage({Key? key}) : super(key: key); // Added Key parameter
+  const BaziPage({super.key});
+
   @override
-  _BaziPageState createState() => _BaziPageState();
+  State<BaziPage> createState() => _BaziPageState();
 }
 
-class _BaziPageState extends State<BaziPage> {
+class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
   String baziResult = '';
   bool isCustomBazi = false; // Flag to track if custom Bazi is being displayed
 
+  late AnimationController _starAnimationController;
+  late Animation<double> _starAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _starAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _starAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
+      CurvedAnimation(
+        parent: _starAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _starAnimationController.dispose();
+    super.dispose();
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDialog(
       context: context,
-      builder: (BuildContext context) { // Added return type
+      builder: (BuildContext context) {
+        // Added return type
         return CustomDatePickerDialog(
           initialDate: selectedDate,
           firstDate: DateTime(1900),
-          lastDate: DateTime.now(),
+          lastDate: DateTime(2100),
         );
       },
     );
@@ -83,53 +112,74 @@ class _BaziPageState extends State<BaziPage> {
       builder: (BuildContext context) {
         TimeOfDay tempSelectedTime = selectedTime;
 
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: GlassMorphismContainer(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'ជ្រើសរើសម៉ោងកំណើត',
-                    style: const TextStyle(
-                      fontFamily: 'Dangrek',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    height: 200, // Set a fixed height for the picker
-                    child: CupertinoDatePicker(
-                      mode: CupertinoDatePickerMode.time, // Show only time picker
-                      initialDateTime: DateTime(
-                        selectedDate.year,
-                        selectedDate.month,
-                        selectedDate.day,
-                        selectedTime.hour,
-                        selectedTime.minute,
+        return Theme(
+          data: ThemeData.light().copyWith(
+            cupertinoOverrideTheme: CupertinoThemeData(
+              brightness: Brightness.light,
+              textTheme: CupertinoTextThemeData(
+                dateTimePickerTextStyle: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Dangrek',
+                  fontSize: 18,
+                ),
+                pickerTextStyle: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Dangrek',
+                ),
+              ),
+            ),
+          ),
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            child: GlassMorphismContainer(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'ជ្រើសរើសម៉ោងកំណើត',
+                      style: TextStyle(
+                        fontFamily: 'Dangrek',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      onDateTimeChanged: (DateTime newDateTime) {
-                        tempSelectedTime = TimeOfDay(hour: newDateTime.hour, minute: newDateTime.minute);
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 200,
+                      child: CupertinoDatePicker(
+                        mode: CupertinoDatePickerMode.time,
+                        initialDateTime: DateTime(
+                          selectedDate.year,
+                          selectedDate.month,
+                          selectedDate.day,
+                          selectedTime.hour,
+                          selectedTime.minute,
+                        ),
+                        onDateTimeChanged: (DateTime newDateTime) {
+                          tempSelectedTime = TimeOfDay(
+                            hour: newDateTime.hour,
+                            minute: newDateTime.minute,
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.withValues(alpha:0.5),
+                        foregroundColor: Colors.white,
+                        textStyle: TextStyle(fontFamily: 'Dangrek'),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context, tempSelectedTime);
                       },
+                      child: Text('បញ្ជាក់'),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.withOpacity(0.5),
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(fontFamily: 'Dangrek'),
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context, tempSelectedTime);
-                    },
-                    child: const Text('បញ្ជាក់'),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -153,35 +203,50 @@ class _BaziPageState extends State<BaziPage> {
 
   Future<void> _takeScreenshot() async {
     try {
-      RenderRepaintBoundary boundary = _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      // Ensure the widget is still in the tree
+      if (!mounted) return;
+
+      RenderRepaintBoundary boundary =
+      _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
       // Capture the image with a higher pixel ratio for better quality
-      ui.Image image = await boundary.toImage(pixelRatio: 4.0); // Adjust the pixel ratio as needed
+      ui.Image image = await boundary.toImage(
+        pixelRatio: 4.0,
+      ); // Adjust the pixel ratio as needed
 
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      if (byteData == null) {
+        throw Exception('Failed to convert image to byte data');
+      }
+      Uint8List pngBytes = byteData.buffer.asUint8List();
 
       // Save the screenshot to the app's private directory
       final directory = await getApplicationDocumentsDirectory();
-      final String filePath = '${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
+      final String filePath =
+          '${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png';
       File file = File(filePath);
       await file.writeAsBytes(pngBytes);
 
       // Share the screenshot
-      await Share.shareFiles([filePath], text: 'ប៉ាជឺ Screenshot');
+      await Share.shareXFiles([XFile(filePath)], text: 'ប៉ាជឺ Screenshot');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✨ បានថតហើយ! សូមមើលនៅអាល់ប៊ុម 🖼️')),
-      );
+      // Check if the widget is still mounted before showing the SnackBar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✨ បានថតហើយ! សូមផ្ញើរទៅលោកគ្រូ')),
+        );
+      }
     } catch (e) {
-      print('ថតមិនជាប់ទេ មានបញ្ហារ: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ថតមិនជាប់ទេ មានបញ្ហារ: $e')),
-      );
+      // Check if the widget is still mounted before showing the error SnackBar
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('ថតមិនជាប់ទេ មានបញ្ហារ: $e')));
+      }
     }
   }
-
-
 
   final GlobalKey _globalKey = GlobalKey();
 
@@ -201,16 +266,20 @@ class _BaziPageState extends State<BaziPage> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/bg.jpg'), // Path to your bg.jpg
+                image: AssetImage('assets/images/bg.jpg'),
+                // Path to your bg.jpg
                 fit: BoxFit.cover,
               ),
             ),
           ),
           // Blur overlay
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Adjust blur intensity
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            // Adjust blur intensity
             child: Container(
-              color: Colors.black.withOpacity(0.3), // Adjust opacity for the blur effect
+              color: Colors.black.withValues(
+                alpha: 0.3,
+              ), // Adjust opacity for the blur effect
             ),
           ),
 
@@ -219,7 +288,8 @@ class _BaziPageState extends State<BaziPage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                SizedBox(height: kToolbarHeight + 50), // Add more space to avoid overlap with HomeScreen menu
+                SizedBox(height: kToolbarHeight + 50),
+                // Add more space to avoid overlap with HomeScreen menu
                 _buildTitle(),
                 SizedBox(height: 20),
 
@@ -233,11 +303,19 @@ class _BaziPageState extends State<BaziPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calendar_today, color: Colors.white, size: 14), // Reduced icon size
+                            Icon(
+                              Icons.calendar_today,
+                              color: Colors.white,
+                              size: 14,
+                            ), // Reduced icon size
                             SizedBox(width: 5), // Reduced spacing
                             Text(
                               'រើសកាល',
-                              style: TextStyle(fontSize: 12, fontFamily: 'Dangrek', color: Colors.white), // Reduced font size
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Dangrek',
+                                color: Colors.white,
+                              ), // Reduced font size
                             ),
                           ],
                         ),
@@ -250,11 +328,19 @@ class _BaziPageState extends State<BaziPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.access_time, color: Colors.white, size: 14), // Reduced icon size
+                            Icon(
+                              Icons.access_time,
+                              color: Colors.white,
+                              size: 14,
+                            ), // Reduced icon size
                             SizedBox(width: 5), // Reduced spacing
                             Text(
                               'រើសម៉ោង',
-                              style: TextStyle(fontSize: 12, fontFamily: 'Dangrek', color: Colors.white), // Reduced font size
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Dangrek',
+                                color: Colors.white,
+                              ), // Reduced font size
                             ),
                           ],
                         ),
@@ -267,11 +353,19 @@ class _BaziPageState extends State<BaziPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calculate, color: Colors.white, size: 14), // Reduced icon size
+                            Icon(
+                              Icons.calculate,
+                              color: Colors.white,
+                              size: 14,
+                            ), // Reduced icon size
                             SizedBox(width: 5), // Reduced spacing
                             Text(
                               'គណនា',
-                              style: TextStyle(fontSize: 12, fontFamily: 'Dangrek', color: Colors.white), // Reduced font size
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Dangrek',
+                                color: Colors.white,
+                              ), // Reduced font size
                             ),
                           ],
                         ),
@@ -282,10 +376,7 @@ class _BaziPageState extends State<BaziPage> {
                 SizedBox(height: 20),
 
                 // Bazi Grid Display
-                RepaintBoundary(
-                  key: _globalKey,
-                  child: _buildBaziGrid(),
-                ),
+                RepaintBoundary(key: _globalKey, child: _buildBaziGrid()),
                 SizedBox(height: 10),
 
                 // Buttons for Read Bazi, Interpret, and Refresh to Daily Bazi
@@ -296,15 +387,23 @@ class _BaziPageState extends State<BaziPage> {
                       onPressed: _showExplanationDialog,
                       child: Text(
                         'អានប៉ាជឺ',
-                        style: TextStyle(fontSize: 14, fontFamily: 'Dangrek', color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Dangrek',
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     SizedBox(width: 20),
                     GlassMorphismButton(
                       onPressed: _showInterpretationDialog,
                       child: Text(
-                        'បកស្រាយ',
-                        style: TextStyle(fontSize: 14, fontFamily: 'Dangrek', color: Colors.white),
+                        'តារាកំណើត',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Dangrek',
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     SizedBox(width: 20),
@@ -312,7 +411,11 @@ class _BaziPageState extends State<BaziPage> {
                       onPressed: _takeScreenshot,
                       child: Text(
                         'ថតទុក',
-                        style: TextStyle(fontSize: 14, fontFamily: 'Dangrek', color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Dangrek',
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     SizedBox(width: 20),
@@ -324,7 +427,11 @@ class _BaziPageState extends State<BaziPage> {
                       },
                       child: Text(
                         '🔄',
-                        style: TextStyle(fontSize: 14, fontFamily: 'Dangrek', color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Dangrek',
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -346,10 +453,10 @@ class _BaziPageState extends State<BaziPage> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.3), // Semi-transparent white
+            color: Colors.red.withValues(alpha: 0.3), // Semi-transparent white
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3), // Light border
+              color: Colors.white.withValues(alpha: 0.3), // Light border
               width: 2.2,
             ),
           ),
@@ -367,7 +474,11 @@ class _BaziPageState extends State<BaziPage> {
     );
   }
 
-  Widget _buildTableCellWithSubtext(String mainText, String subText, {bool isHeader = false}) {
+  Widget _buildTableCellWithSubtext(
+    String mainText,
+    String subText, {
+    bool isHeader = false,
+  }) {
     return Container(
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -376,7 +487,8 @@ class _BaziPageState extends State<BaziPage> {
           Text(
             mainText,
             style: TextStyle(
-              color: isHeader ? Colors.white : Colors.white.withOpacity(0.8),
+              color:
+                  isHeader ? Colors.white : Colors.white.withValues(alpha: 0.8),
               fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
               fontFamily: 'Dangrek',
               fontSize: 12, // Reduced font size
@@ -385,7 +497,7 @@ class _BaziPageState extends State<BaziPage> {
           Text(
             subText,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
+              color: Colors.white.withValues(alpha: 0.6),
               fontSize: 10, // Reduced font size
               fontFamily: 'Dangrek',
             ),
@@ -401,7 +513,10 @@ class _BaziPageState extends State<BaziPage> {
     TimeOfDay displayTime = isCustomBazi ? selectedTime : TimeOfDay.now();
 
     // Generate astrological data based on the selected date and time
-    Map<String, List<String>> astroData = BaziCalculator.getAstroData(displayDate, displayTime);
+    Map<String, List<String>> astroData = BaziCalculator.getAstroData(
+      displayDate,
+      displayTime,
+    );
 
     // Format the date and time
     String formattedDate = DateFormat('yyyy-MM-dd').format(displayDate);
@@ -428,16 +543,18 @@ class _BaziPageState extends State<BaziPage> {
         // Bazi Grid
         Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2), // Semi-transparent white
+            color: Colors.white.withValues(alpha: 0.2),
+            // Semi-transparent white
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3), // Light border
+              color: Colors.white.withValues(alpha: 0.3), // Light border
               width: 1.5,
             ),
           ),
           padding: EdgeInsets.all(16),
           child: Table(
-            border: TableBorder.all(color: Colors.white.withOpacity(0.5)), // Add grid lines
+            border: TableBorder.all(color: Colors.white.withValues(alpha: 0.5)),
+            // Add grid lines
             columnWidths: const {
               0: FlexColumnWidth(1),
               1: FlexColumnWidth(1),
@@ -449,11 +566,24 @@ class _BaziPageState extends State<BaziPage> {
               // Header Row
               TableRow(
                 children: [
-                  _buildTableCellWithImage('assets/images/logo.png'), // Replace text with logo
-                  _buildTableCellWithSubtext('ម៉ោង', displayTime.format(context)),
-                  _buildTableCellWithSubtext('ថ្ងៃ', DateFormat('dd').format(displayDate)),
-                  _buildTableCellWithSubtext('ខែ', DateFormat('MM').format(displayDate)),
-                  _buildTableCellWithSubtext('ឆ្នាំ', DateFormat('yyyy').format(displayDate)),
+                  _buildTableCellWithImage('assets/images/logo.png'),
+                  // Replace text with logo
+                  _buildTableCellWithSubtext(
+                    'ម៉ោង',
+                    displayTime.format(context),
+                  ),
+                  _buildTableCellWithSubtext(
+                    'ថ្ងៃ',
+                    DateFormat('dd').format(displayDate),
+                  ),
+                  _buildTableCellWithSubtext(
+                    'ខែ',
+                    DateFormat('MM').format(displayDate),
+                  ),
+                  _buildTableCellWithSubtext(
+                    'ឆ្នាំ',
+                    DateFormat('yyyy').format(displayDate),
+                  ),
                 ],
               ),
               // Stem Row
@@ -461,7 +591,10 @@ class _BaziPageState extends State<BaziPage> {
                 children: [
                   _buildTableCell('天干', isHeader: true),
                   _buildTableCellWithColor(astroData['Hour']?[0] ?? 'N/A'),
-                  _buildTableCellWithColor(astroData['Day']?[0] ?? 'N/A', backgroundColor: Colors.redAccent.shade100),
+                  _buildTableCellWithColor(
+                    astroData['Day']?[0] ?? 'N/A',
+                    backgroundColor: Colors.redAccent.shade100,
+                  ),
                   _buildTableCellWithColor(astroData['Month']?[0] ?? 'N/A'),
                   _buildTableCellWithColor(astroData['Year']?[0] ?? 'N/A'),
                 ],
@@ -471,7 +604,10 @@ class _BaziPageState extends State<BaziPage> {
                 children: [
                   _buildTableCell('地支', isHeader: true),
                   _buildTableCellWithColor(astroData['Hour']?[1] ?? 'N/A'),
-                  _buildTableCellWithColor(astroData['Day']?[1] ?? 'N/A', backgroundColor: Colors.redAccent.shade100),
+                  _buildTableCellWithColor(
+                    astroData['Day']?[1] ?? 'N/A',
+                    backgroundColor: Colors.redAccent.shade100,
+                  ),
                   _buildTableCellWithColor(astroData['Month']?[1] ?? 'N/A'),
                   _buildTableCellWithColor(astroData['Year']?[1] ?? 'N/A'),
                 ],
@@ -481,7 +617,10 @@ class _BaziPageState extends State<BaziPage> {
                 children: [
                   _buildTableCell('藏干', isHeader: true),
                   _buildTableCellWithColor(astroData['Hour']?[2] ?? 'N/A'),
-                  _buildTableCellWithColor(astroData['Day']?[2] ?? 'N/A', backgroundColor: Colors.redAccent.shade100),
+                  _buildTableCellWithColor(
+                    astroData['Day']?[2] ?? 'N/A',
+                    backgroundColor: Colors.redAccent.shade100,
+                  ),
                   _buildTableCellWithColor(astroData['Month']?[2] ?? 'N/A'),
                   _buildTableCellWithColor(astroData['Year']?[2] ?? 'N/A'),
                 ],
@@ -491,7 +630,10 @@ class _BaziPageState extends State<BaziPage> {
                 children: [
                   _buildTableCell('納音', isHeader: true),
                   _buildTableCellWithColor(astroData['Hour']?[3] ?? 'N/A'),
-                  _buildTableCellWithColor(astroData['Day']?[3] ?? 'N/A', backgroundColor: Colors.redAccent.shade100),
+                  _buildTableCellWithColor(
+                    astroData['Day']?[3] ?? 'N/A',
+                    backgroundColor: Colors.redAccent.shade100,
+                  ),
                   _buildTableCellWithColor(astroData['Month']?[3] ?? 'N/A'),
                   _buildTableCellWithColor(astroData['Year']?[3] ?? 'N/A'),
                 ],
@@ -501,7 +643,10 @@ class _BaziPageState extends State<BaziPage> {
                 children: [
                   _buildTableCell('干支', isHeader: true),
                   _buildTableCellWithColor(astroData['Hour']?[4] ?? 'N/A'),
-                  _buildTableCellWithColor(astroData['Day']?[4] ?? 'N/A', backgroundColor: Colors.redAccent.shade100),
+                  _buildTableCellWithColor(
+                    astroData['Day']?[4] ?? 'N/A',
+                    backgroundColor: Colors.redAccent.shade100,
+                  ),
                   _buildTableCellWithColor(astroData['Month']?[4] ?? 'N/A'),
                   _buildTableCellWithColor(astroData['Year']?[4] ?? 'N/A'),
                 ],
@@ -517,18 +662,17 @@ class _BaziPageState extends State<BaziPage> {
     return Container(
       padding: const EdgeInsets.all(8),
       child: Center(
-        child: Image.asset(
-          imagePath,
-          width: 32,
-          height: 32,
-          fit: BoxFit.cover,
-        ),
+        child: Image.asset(imagePath, width: 32, height: 32, fit: BoxFit.cover),
       ),
     );
   }
 
-// Helper function to build table cells with color based on element
-  Widget _buildTableCellWithColor(String text, {bool isHeader = false, Color? backgroundColor}) {
+  // Helper function to build table cells with color based on element
+  Widget _buildTableCellWithColor(
+    String text, {
+    bool isHeader = false,
+    Color? backgroundColor,
+  }) {
     // Define color mappings for Heavenly Stems and Earthly Branches
     final Map<String, Color> stemColorMap = {
       '甲': Colors.green, // Wood
@@ -568,7 +712,8 @@ class _BaziPageState extends State<BaziPage> {
         child: Text(
           text,
           style: TextStyle(
-            color: color ?? Colors.white.withOpacity(0.8), // Default to white if no color is found
+            color: color ?? Colors.white.withValues(alpha: 0.8),
+            // Default to white if no color is found
             fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
             fontFamily: 'Dangrek',
             fontSize: 12, // Reduced font size
@@ -578,7 +723,7 @@ class _BaziPageState extends State<BaziPage> {
     );
   }
 
-// Helper function to build a table cell with centered and smaller text
+  // Helper function to build a table cell with centered and smaller text
   Widget _buildTableCell(String text, {bool isHeader = false}) {
     return TableCell(
       child: Center(
@@ -598,154 +743,533 @@ class _BaziPageState extends State<BaziPage> {
     );
   }
 
-
-// Show Explanation Dialog
+  // Show Explanation Dialog
   void _showExplanationDialog() {
+    // Determine which date and time to use
+    DateTime displayDate = isCustomBazi ? selectedDate : DateTime.now();
+    TimeOfDay displayTime = isCustomBazi ? selectedTime : TimeOfDay.now();
+
+    // Generate astrological data based on the selected date and time
+    Map<String, List<String>> astroData = BaziCalculator.getAstroData(
+      displayDate,
+      displayTime,
+    );
+
+    // Format the date and time
+    String formattedDate = DateFormat('yyyy-MM-dd').format(displayDate);
+    String formattedTime = displayTime.format(context);
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.red.withOpacity(0.4),
-          content: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1.5,
+          backgroundColor: Colors.redAccent.withValues(alpha: 0.4),
+          content: Stack(
+            children: [
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(decoration: BoxDecoration(color: Colors.transparent)),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 30),
+
+                        // Date and Time information
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'អានប៉ាជឺ',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'កើត: $formattedDate\nម៉ោង: $formattedTime',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // Bazi Pillars explanation
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Table(
+                            columnWidths: const {
+                              0: FlexColumnWidth(1),
+                              1: FlexColumnWidth(2),
+                            },
+                            children: [
+                              _buildPillarRow('ម៉ោង', astroData['Hour'] ?? []),
+                              _buildPillarRow('ថ្ងៃ', astroData['Day'] ?? []),
+                              _buildPillarRow('ខែ', astroData['Month'] ?? []),
+                              _buildPillarRow('ឆ្នាំ', astroData['Year'] ?? []),
+                            ],
+                          ),
+                        ),
+
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // Stars/Gan Zhi information (last row from bazi grid)
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'តារាប៉ាជឺ (干支)',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildStarInfo('ម៉ោង', astroData['Hour']?[4] ?? 'N/A'),
+                              _buildStarInfo('ថ្ងៃ', astroData['Day']?[4] ?? 'N/A'),
+                              _buildStarInfo('ខែ', astroData['Month']?[4] ?? 'N/A'),
+                              _buildStarInfo('ឆ្នាំ', astroData['Year']?[4] ?? 'N/A'),
+                            ],
+                          ),
+                        ),
+
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // General explanation
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ពន្យល់ប៉ាជឺ',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'ប៉ាជឺគឺជាប្រព័ន្ធហោរាសាស្ត្រចិនដែលផ្អែកលើកាលបរិច្ឆេទ និងម៉ោងកំណើត។ វាមាន៤សសរដែលរៀងគ្នាតំណាងឱ្យឆ្នាំ ខែ ថ្ងៃ និងម៉ោងកំណើត។ '
+                                    'គ្រប់សសរមានធាតុអាកាស (天干) និងធាតុដី (地支) ដែលអាចបង្ហាញពីវាសនានិងចរិតលក្ខណៈរបស់មនុស្ស។ '
+                                    'តារាប៉ាជឺ (干支) បង្ហាញពីលក្ខណៈពិសេសនិងឥទ្ធិពលលើជីវិត។',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontFamily: 'Siemreap',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'អានប៉ាជឺ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Dangrek',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'This is a text-based explanation of the Bazi result.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontFamily: 'Dangrek',
-                      ),
-                    ),
-                  ],
+
+              // Logo image (half inside, half outside)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
           actions: [
-            ElevatedButton(
+          Center(
+          child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.5),
+                backgroundColor: Colors.red.withValues(alpha: 0.5),
                 foregroundColor: Colors.white,
                 textStyle: const TextStyle(fontFamily: 'Dangrek'),
               ),
               onPressed: () => Navigator.pop(context),
               child: const Text('យល់ព្រម'),
             ),
+          ),
           ],
         );
       },
+    );
+  }
+
+// Helper method to build pillar information row
+  TableRow _buildPillarRow(String title, List<String> data) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: Colors.white70,
+              fontFamily: 'Dangrek',
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (data.isNotEmpty && data[0].isNotEmpty)
+                Text(
+                  'អាកាស: ${data[0]}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Dangrek',
+                  ),
+                ),
+              if (data.length > 1 && data[1].isNotEmpty)
+                Text(
+                  'ដី: ${data[1]}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Dangrek',
+                  ),
+                ),
+              if (data.length > 2 && data[2].isNotEmpty)
+                Text(
+                  'អាកាសកំបាំង: ${data[2]}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Dangrek',
+                  ),
+                ),
+              if (data.length > 3 && data[3].isNotEmpty)
+                Text(
+                  'ណាយិន: ${data[3]}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Dangrek',
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+// Helper method to build star information
+  Widget _buildStarInfo(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '$title: ',
+              style: TextStyle(
+                color: Colors.white70,
+                fontFamily: 'Dangrek',
+              ),
+            ),
+            TextSpan(
+              text: value,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Dangrek',
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   // Show Interpretation Dialog
   void _showInterpretationDialog() {
+    DateTime displayDate = isCustomBazi ? selectedDate : DateTime.now();
+    Map<String, String> starInfo = BaziCalculator.getNineStarInfo(displayDate);
+    int starNumber = int.parse(starInfo['starNumber']!);
+
+    final starImages = {
+      1: 'assets/images/star1.png',
+      2: 'assets/images/star2.png',
+      3: 'assets/images/star3.png',
+      4: 'assets/images/star4.png',
+      5: 'assets/images/star5.png',
+      6: 'assets/images/star6.png',
+      7: 'assets/images/star7.png',
+      8: 'assets/images/star8.png',
+      9: 'assets/images/star9.png',
+    };
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.red.withOpacity(0.4),
-          content: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.3),
-                  width: 1.5,
+          backgroundColor: Colors.redAccent.withValues(alpha: 0.4),
+          content: Stack(
+            children: [
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(decoration: BoxDecoration(color: Colors.transparent)),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const SizedBox(height: 30),
+
+                        // Star name and basic info
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                starInfo['name']!,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: _getStarColor(starNumber),
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'កើត: ${DateFormat('yyyy-MM-dd').format(displayDate)}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // Star attributes
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Table(
+                            columnWidths: const {
+                              0: FlexColumnWidth(1),
+                              1: FlexColumnWidth(2),
+                            },
+                            children: [
+                              _buildAttributeRow('ធាតុ', starInfo['element']!),
+                              _buildAttributeRow('ទិស', starInfo['direction']!),
+                              _buildAttributeRow('ព័ណ៌', starInfo['color']!),
+                              _buildAttributeRow('អ៊ីនយ៉ាង', starInfo['yinYang']!),
+                              _buildAttributeRow('គ័រ', starInfo['luck']!),
+                            ],
+                          ),
+                        ),
+
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // Characteristics
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'តារាកំណើតលេខ $starNumber ប្រចាំខ្លួន',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                starInfo['characteristics']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontFamily: 'Siemreap',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // Advice
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'វេលាហេង និងឆុង',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                starInfo['advice']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                  fontFamily: 'Siemreap',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'បកស្រាយ',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Dangrek',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Image.asset(
-                      'assets/images/intepretation.png', // Path to your interpretative image
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  ],
+
+              // Star image
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: AnimatedBuilder(
+                    animation: _starAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _starAnimation.value,
+                        child: Image.asset(
+                          starImages[starNumber]!,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
           actions: [
-            ElevatedButton(
+          Center(
+          child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withOpacity(0.5),
+                backgroundColor: Colors.red.withValues(alpha: 0.5),
                 foregroundColor: Colors.white,
                 textStyle: const TextStyle(fontFamily: 'Dangrek'),
               ),
               onPressed: () => Navigator.pop(context),
               child: const Text('យល់ព្រម'),
             ),
+          ),
           ],
         );
       },
     );
   }
-}
+
+  Color _getStarColor(int starNumber) {
+    switch (starNumber) {
+      case 1: return Colors.white;
+      case 2: return Colors.black;
+      case 3: return Colors.green;
+      case 4: return Colors.green[400]!;
+      case 5: return Colors.yellow;
+      case 6: return Colors.white;
+      case 7: return Colors.red;
+      case 8: return Colors.white;
+      case 9: return Colors.purple;
+      default: return Colors.white;
+    }
+  }
+
+  TableRow _buildAttributeRow(String label, String value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white70,
+              fontFamily: 'Dangrek',
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Dangrek',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+// Helper function to get color based on star number
+  }
 
 // Custom Glass Morphism Container for Bazi Result
 class GlassMorphismContainer extends StatelessWidget {
   final Widget child;
 
   const GlassMorphismContainer({
-    Key? key, // Added Key parameter
+    super.key, // Added Key parameter
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -755,10 +1279,10 @@ class GlassMorphismContainer extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3),
+              color: Colors.white.withValues(alpha: 0.3),
               width: 1.5,
             ),
           ),
@@ -775,14 +1299,14 @@ class CustomDatePickerDialog extends StatefulWidget {
   final DateTime lastDate;
 
   const CustomDatePickerDialog({
-    Key? key, // Added Key parameter
+    super.key,
     required this.initialDate,
     required this.firstDate,
     required this.lastDate,
-  }) : super(key: key);
+  });
 
   @override
-  _CustomDatePickerDialogState createState() => _CustomDatePickerDialogState();
+  State<CustomDatePickerDialog> createState() => _CustomDatePickerDialogState();
 }
 
 class _CustomDatePickerDialogState extends State<CustomDatePickerDialog> {
@@ -796,54 +1320,73 @@ class _CustomDatePickerDialogState extends State<CustomDatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: GlassMorphismContainer(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'ជ្រើសរើសកាលបរិច្ឆេទ',
-                style: const TextStyle(
-                  fontFamily: 'Dangrek',
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+    return Theme(
+      data: ThemeData.light().copyWith(
+        cupertinoOverrideTheme: CupertinoThemeData(
+          brightness: Brightness.light,
+          textTheme: CupertinoTextThemeData(
+            dateTimePickerTextStyle: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Dangrek',
+              fontSize: 18,
+            ),
+            pickerTextStyle: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Dangrek',
+            ),
+          ),
+        ),
+      ),
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        child: GlassMorphismContainer(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'ជ្រើសរើសកាលបរិច្ឆេទ',
+                  style: TextStyle(
+                    fontFamily: 'Dangrek',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 200, // Set a fixed height for the picker
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: _selectedDate,
-                  minimumDate: widget.firstDate,
-                  maximumDate: widget.lastDate,
-                  onDateTimeChanged: (DateTime newDate) {
-                    setState(() {
-                      _selectedDate = newDate;
-                    });
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 200,
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime: _selectedDate,
+                    minimumDate: widget.firstDate,
+                    maximumDate: widget.lastDate,
+                    onDateTimeChanged: (DateTime newDate) {
+                      setState(() {
+                        _selectedDate = newDate;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.withValues(alpha:0.5),
+                    foregroundColor: Colors.white,
+                    textStyle: TextStyle(fontFamily: 'Dangrek'),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, _selectedDate);
                   },
+                  child: Text('បញ្ជាក់'),
                 ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.withOpacity(0.5),
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontFamily: 'Dangrek'),
-                ),
-                onPressed: () {
-                  Navigator.pop(context, _selectedDate);
-                },
-                child: const Text('បញ្ជាក់'),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
+
