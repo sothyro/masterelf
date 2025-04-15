@@ -86,6 +86,7 @@ class _LopanScreenState extends State<LopanScreen> {
       await Share.shareXFiles([XFile(imagePath.path)],
           text: 'Check out my compass direction!');
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to take screenshot: $e')),
       );
