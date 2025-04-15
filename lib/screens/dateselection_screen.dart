@@ -282,7 +282,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                 padding: const EdgeInsets.only(top: 40.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SingleChildScrollView(
@@ -330,7 +330,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
 
-                        Divider(color: Colors.white.withOpacity(0.5)),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         // Zodiac information
                         Padding(
@@ -381,7 +381,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
 
-                        Divider(color: Colors.white.withOpacity(0.5)),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         // Combined activities and fortune information
                         Padding(
@@ -991,7 +991,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
             ),
           ),
           child: const Text(
-            'មើលវេលាសិរីមង្គល',
+            'មើលវេលាសិរី វេលាមង្គល',
             style: TextStyle(
               fontFamily: 'Dangrek',
               fontSize: 22,

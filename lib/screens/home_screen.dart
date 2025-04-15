@@ -34,26 +34,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   ];
 
   final Map<String, List<String>> _dropdownItems = {
-    '🔥ហុងស៊ុយថ្មីៗ': ['វីដេអូ·Vlogs', 'ហុងស៊ុយឆ្នាំថ្មី', 'សៀវភៅយុគ្គ9'],
-    '🧧មើលលាភហេង': ['តារាសាស្ត្រ·飞星', 'ទ្វារវាសនា·奇门', 'អ៊ីជីង·易經'],
-    '☯️ម៉ាស្ទ័រអេល': ['ទំនាក់ទំនង', 'ណាត់ជួបម៉ាស្ទ័រ', 'សិក្ខាសាលា'],
+    '🔥ហុងស៊ុយយុគ9': ['វីដេអូ ·Vlogs', 'សៀវភៅយុគ9','វត្ថុកែហុងស៊ុយ'],
+    '🧧លាភហេងឆ្នាំថ្មី': ['រាសីឆ្នាំទាំង12', 'ចូលរួមកម្មវិធី', 'ដេគ័រកាត់ឆុង'],//['តារាសាស្ត្រ·飞星', 'ទ្វារវាសនា·奇门', 'អ៊ីជីង·易經'],
+    '☯️ម៉ាស្ទ័រអេល': ['ទំនាក់ទំនង', 'ណាត់ពិភាក្សា', 'អំពីកម្មវិធីនេះ'],
   };
 
   final Map<String, String> _itemUrls = {
-    'វីដេអូ·Vlogs': 'https://masterelf.vip/vlogs/',
-    'ហុងស៊ុយឆ្នាំថ្មី': 'https://masterelf.vip/yearly/',
-    'សៀវភៅយុគ្គ9': 'https://masterelf.vip/period9/',
-    'តារាសាស្ត្រ·飞星': 'https://masterelf.vip/xuankong/',
-    'ទ្វារវាសនា·奇门': 'https://masterelf.vip/qimen/',
-    'អ៊ីជីង·易經': 'https://masterelf.vip/iching/',
-    'ណាត់ជួបម៉ាស្ទ័រ': 'https://masterelf.vip/appointment/',
-    'សិក្ខាសាលា': 'https://masterelf.vip/event/',
-    //'ទំនាក់ទំនង': 'https://masterelf.vip/contact/',
+    'វីដេអូ ·Vlogs': 'https://period9.masterelf.vip/vlogs',
+    'សៀវភៅយុគ9': 'https://period9.masterelf.vip/period9',
+    'វត្ថុកែហុងស៊ុយ': 'https://period9.masterelf.vip/store',
+    'រាសីឆ្នាំទាំង12': 'https://period9.masterelf.vip/zodiac',
+    'ចូលរួមកម្មវិធី': 'https://period9.masterelf.vip/event',
+    'ដេគ័រកាត់ឆុង': 'https://period9.masterelf.vip/fengshuicure',
+    'ណាត់ពិភាក្សា': 'https://period9.masterelf.vip/appointment',
+    //'អំពីកម្មវិធីយុគ9': 'https://masterelf.vip/contact/',
   };
 
   final Map<String, GlobalKey> _buttonKeys = {
-    '🔥ហុងស៊ុយថ្មីៗ': GlobalKey(),
-    '🧧មើលលាភហេង': GlobalKey(),
+    '🔥ហុងស៊ុយយុគ9': GlobalKey(),
+    '🧧លាភហេងឆ្នាំថ្មី': GlobalKey(),
     '☯️ម៉ាស្ទ័រអេល': GlobalKey(),
   };
 
@@ -199,9 +198,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildMenuButton('🔥ហុងស៊ុយថ្មីៗ'),
+                  _buildMenuButton('🔥ហុងស៊ុយយុគ9'),
                   const SizedBox(width: 10),
-                  _buildMenuButton('🧧មើលលាភហេង'),
+                  _buildMenuButton('🧧លាភហេងឆ្នាំថ្មី'),
                   const SizedBox(width: 10),
                   _buildMenuButton('☯️ម៉ាស្ទ័រអេល'),
                 ],
