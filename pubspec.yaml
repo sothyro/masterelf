@@ -25,7 +25,6 @@ dependencies:
   webview_flutter: ^4.4.2 # For web browser functionality
   lottie: ^2.3.1 # For Lottie animations
   flutter_blurhash: ^0.7.0 # For blur effect (optional, if needed)
-  audioplayers: ^6.4.0 # Use the latest version
   path_provider: ^2.1.1 # For saving files to the device
   share_plus: ^7.0.0   # For sharing the screenshot
   url_launcher: ^6.1.5

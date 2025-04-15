@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  audioplayers_windows
   connectivity_plus
   dart_iztro
   permission_handler_windows

@@ -5,7 +5,6 @@
 import FlutterMacOS
 import Foundation
 
-import audioplayers_darwin
 import connectivity_plus
 import dart_iztro
 import path_provider_foundation
@@ -16,7 +15,6 @@ import video_player_avfoundation
 import webview_flutter_wkwebview
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
-  AudioplayersDarwinPlugin.register(with: registry.registrar(forPlugin: "AudioplayersDarwinPlugin"))
   ConnectivityPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlugin"))
   DartIztroPlugin.register(with: registry.registrar(forPlugin: "DartIztroPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
