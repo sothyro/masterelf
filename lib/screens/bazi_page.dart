@@ -759,6 +759,15 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
     // Get comprehensive analysis
     final analysis = BaziAnalysis.getBaziAnalysis(displayDate, displayTime, astroData);
 
+    // Add Key Interactions to the analysis
+    analysis['keyInteractions'] = BaziAnalysis.getKeyInteractions(
+      dayMaster: analysis['dayMaster'],
+      yearAnalysis: analysis['yearAnalysis'],
+      monthAnalysis: analysis['monthAnalysis'],
+      dayAnalysis: analysis['dayAnalysis'],
+      hourAnalysis: analysis['hourAnalysis'],
+    );
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -834,6 +843,37 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
 
                         // Hour Pillar Analysis
                         _buildPillarSection(analysis['hourAnalysis'], 'Hour Pillar'),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Key Interactions',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              ...(analysis['keyInteractions'] as List<String>).map((interaction) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Text(
+                                  interaction,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              )).toList(),
+                            ],
+                          ),
+                        ),
                         Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         // Key Takeaways

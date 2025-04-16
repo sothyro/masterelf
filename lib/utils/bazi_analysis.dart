@@ -17,52 +17,104 @@ class BaziAnalysis {
     final formattedDate = DateFormat('yyyy-MM-dd').format(date);
     final formattedTime = '${time.hour}:${time.minute}';
 
-    // Define all possible Nayin interpretations
-    const nayinInterpretations = {
-      '海中金': 'Hidden treasure, patient but ambitious',
-      '剑锋金': 'Sharp as a sword, decisive and cutting',
-      '白蜡金': 'Delicate metal, refined but fragile',
-      '砂石金': 'Unrefined ore, hardworking and persistent',
-      '金箔金': 'Ornamental gold, artistic and vain',
-      '钗钏金': 'Jewelry gold, luxury-loving and elegant',
-      '大林木': 'Forest wood, protective and nurturing',
-      '杨柳木': 'Willow wood, flexible and emotional',
-      '松柏木': 'Pine wood, resilient and principled',
-      '平地木': 'Shrub wood, humble and steady',
-      '桑柘木': 'Mulberry wood, generous and family-oriented',
-      '石榴木': 'Pomegranate wood, defensive and passionate',
-      '涧下水': 'Mountain stream, gentle and introspective',
-      '大溪水': 'Big river, adventurous and restless',
-      '长流水': 'Long flowing water, philosophical and deep',
-      '天河水': 'Sky river, visionary and detached',
-      '泉中水': 'Spring water, mysterious and intuitive',
-      '大海水': 'Ocean water, charismatic and unpredictable',
-      '炉中火': 'Furnace fire, passionate and focused',
-      '山头火': 'Mountain fire, independent and impulsive',
-      '霹雳火': 'Lightning fire, revolutionary and explosive',
-      '山下火': 'Foot-hill fire, warm but fading energy',
-      '覆灯火': 'Lantern fire, intellectual and guarded',
-      '天上火': 'Sun fire, bold and dominant',
-      '壁上土': 'Wall earth, defensive and stubborn',
-      '城头土': 'City wall earth, loyal and traditional',
-      '沙中土': 'Desert sand, flexible but unstable',
-      '路旁土': 'Roadside earth, practical and transient',
-      '大驿土': 'Highway earth, sociable and adaptable',
-      '屋上土': 'Roof earth, protective and home-loving',
+    // Add to the top of the file
+    const completeNayinInterpretations = {
+      '海中金': 'Sea Gold - Hidden potential that needs time to develop, like treasure in the ocean. Represents patience and long-term growth.',
+      '剑锋金': 'Sword Gold - Sharp and decisive like a blade. Indicates strong willpower and ability to cut through obstacles.',
+      '白蜡金': 'White Wax Gold - Delicate and refined but can melt under pressure. Needs protection and careful handling.',
+      '砂石金': 'Sand Gold - Unrefined potential that requires work. Represents perseverance through difficulties.',
+      '金箔金': 'Gold Foil - Decorative and beautiful. Indicates artistic talent but can be superficial if not grounded.',
+      '钗钏金': 'Hairpin Gold - Valuable and elegant. Represents refinement and appreciation for beauty.',
+      '大林木': 'Forest Wood - Strong and protective like a giant tree. Provides shelter and support for others.',
+      '杨柳木': 'Willow Wood - Flexible and adaptable. Can bend without breaking in difficult situations.',
+      '松柏木': 'Pine Wood - Evergreen and resilient. Maintains strength through all seasons of life.',
+      '平地木': 'Flatland Wood - Humble and steady growth. Not flashy but reliable and enduring.',
+      '桑柘木': 'Mulberry Wood - Fruit-bearing and nurturing. Provides sustenance for others.',
+      '石榴木': 'Pomegranate Wood - Protective with thorns. Strong boundaries with sweet rewards inside.',
+      '涧下水': 'Mountain Stream - Clear and purposeful flow. Small but determined path through life.',
+      '大溪水': 'Big River - Powerful current that can change course. Represents major life changes.',
+      '长流水': 'Long Flowing Water - Continuous and persistent. Steady progress over long periods.',
+      '天河水': 'Sky River - Heavenly and detached. Big-picture thinking but may lack practicality.',
+      '泉中水': 'Spring Water - Pure and emerging from deep sources. Intuitive and mysterious nature.',
+      '大海水': 'Ocean Water - Boundless and powerful. Can be overwhelming but full of potential.',
+      '炉中火': 'Furnace Fire - Contained and focused energy. Strong passion with discipline.',
+      '山头火': 'Mountain Fire - Wild and independent. Burns brightly but may lack control.',
+      '霹雳火': 'Lightning Fire - Sudden and dramatic. Quick transformations and revelations.',
+      '山下火': 'Foot-hill Fire - Diminishing energy. Needs rekindling to maintain passion.',
+      '覆灯火': 'Lantern Fire - Intellectual light. Provides guidance but needs protection from winds.',
+      '天上火': 'Sun Fire - Dominant and radiant. Natural leadership with powerful presence.',
+      '壁上土': 'Wall Earth - Defensive and strong boundaries. Provides security but can isolate.',
+      '城头土': 'City Wall Earth - Protective of community. Traditional values and loyalty.',
+      '沙中土': 'Desert Sand - Shifting and unstable. Needs anchoring to find stability.',
+      '路旁土': 'Roadside Earth - Practical and transient. Helps others on their journeys.',
+      '大驿土': 'Highway Earth - Connects people and ideas. Sociable and adaptable nature.',
+      '屋上土': 'Roof Earth - Protective shelter. Creates safe spaces for family and home.',
     };
 
-    // Define special star interpretations
-    const specialStarMeanings = {
-      '天官': 'Heavenly Official - Bureaucratic influence, authority',
-      '劫煞': 'Robbery Star - Risk of financial loss or theft',
-      '驿马': 'Travel Horse - Movement, change, expansion',
-      '文昌': 'Academic Star - Success in studies and knowledge',
-      '红鸾': 'Peach Blossom - Romantic opportunities',
-      '孤辰': 'Loneliness Star - Isolation or difficulty bonding',
-      '寡宿': 'Widow Star - Emotional distance in relationships',
-      '羊刃': 'Blade Star - Aggression and potential conflict',
-      '将星': 'General Star - Leadership and authority',
+    const completeSpecialStarMeanings = {
+      '天官': 'Heavenly Official - Strong bureaucratic influence, government connections, or structured authority in life.',
+      '劫煞': 'Robbery Star - Risk of unexpected losses, theft, or financial leaks. Need for extra protection.',
+      '驿马': 'Travel Horse - Frequent movement, changes, or international opportunities. Indicates a mobile lifestyle.',
+      '文昌': 'Academic Star - Strong literary and learning abilities. Success in studies and knowledge-based pursuits.',
+      '红鸾': 'Peach Blossom - Romantic opportunities and charm. Strong appeal to others in relationships.',
+      '孤辰': 'Loneliness Star - Tendency toward isolation or difficulty forming deep connections.',
+      '寡宿': 'Widow Star - Emotional distance in relationships. May indicate late marriage or solitude.',
+      '羊刃': 'Blade Star - Cutting energy that can lead to conflicts. Needs careful channeling.',
+      '将星': 'General Star - Natural leadership abilities and authority. Strong career potential.',
+      '天乙贵人': 'Nobleman Star - Help from influential people. Lucky encounters that assist your path.',
+      '太极贵人': 'Wisdom Star - Spiritual insight and philosophical depth. Attraction to metaphysics.',
+      '华盖': 'Canopy Star - Artistic talent and unconventional thinking. May feel misunderstood.',
+      '金舆': 'Golden Chariot - Material comfort and luxury. Indicates wealth potential.',
+      '灾煞': 'Disaster Star - Warning of accidents or crises. Need for caution in specified areas.',
+      '亡神': 'Death Spirit - Hidden dangers or health concerns. Requires preventive measures.',
     };
+
+    // Define all possible Nayin interpretations
+    // const nayinInterpretations = {
+    //   '海中金': 'Hidden treasure, patient but ambitious',
+    //   '剑锋金': 'Sharp as a sword, decisive and cutting',
+    //   '白蜡金': 'Delicate metal, refined but fragile',
+    //   '砂石金': 'Unrefined ore, hardworking and persistent',
+    //   '金箔金': 'Ornamental gold, artistic and vain',
+    //   '钗钏金': 'Jewelry gold, luxury-loving and elegant',
+    //   '大林木': 'Forest wood, protective and nurturing',
+    //   '杨柳木': 'Willow wood, flexible and emotional',
+    //   '松柏木': 'Pine wood, resilient and principled',
+    //   '平地木': 'Shrub wood, humble and steady',
+    //   '桑柘木': 'Mulberry wood, generous and family-oriented',
+    //   '石榴木': 'Pomegranate wood, defensive and passionate',
+    //   '涧下水': 'Mountain stream, gentle and introspective',
+    //   '大溪水': 'Big river, adventurous and restless',
+    //   '长流水': 'Long flowing water, philosophical and deep',
+    //   '天河水': 'Sky river, visionary and detached',
+    //   '泉中水': 'Spring water, mysterious and intuitive',
+    //   '大海水': 'Ocean water, charismatic and unpredictable',
+    //   '炉中火': 'Furnace fire, passionate and focused',
+    //   '山头火': 'Mountain fire, independent and impulsive',
+    //   '霹雳火': 'Lightning fire, revolutionary and explosive',
+    //   '山下火': 'Foot-hill fire, warm but fading energy',
+    //   '覆灯火': 'Lantern fire, intellectual and guarded',
+    //   '天上火': 'Sun fire, bold and dominant',
+    //   '壁上土': 'Wall earth, defensive and stubborn',
+    //   '城头土': 'City wall earth, loyal and traditional',
+    //   '沙中土': 'Desert sand, flexible but unstable',
+    //   '路旁土': 'Roadside earth, practical and transient',
+    //   '大驿土': 'Highway earth, sociable and adaptable',
+    //   '屋上土': 'Roof earth, protective and home-loving',
+    // };
+    //
+    // // Define special star interpretations
+    // const specialStarMeanings = {
+    //   '天官': 'Heavenly Official - Bureaucratic influence, authority',
+    //   '劫煞': 'Robbery Star - Risk of financial loss or theft',
+    //   '驿马': 'Travel Horse - Movement, change, expansion',
+    //   '文昌': 'Academic Star - Success in studies and knowledge',
+    //   '红鸾': 'Peach Blossom - Romantic opportunities',
+    //   '孤辰': 'Loneliness Star - Isolation or difficulty bonding',
+    //   '寡宿': 'Widow Star - Emotional distance in relationships',
+    //   '羊刃': 'Blade Star - Aggression and potential conflict',
+    //   '将星': 'General Star - Leadership and authority',
+    // };
 
     // Helper function to get pillar analysis
     Map<String, String> getPillarAnalysis(
@@ -84,11 +136,9 @@ class BaziAnalysis {
       // Hidden Stems elements
       final hiddenElements = hiddenStems.split('').map(_getElementFromStem).join(', ');
 
-      // Nayin interpretation
-      final nayinMeaning = nayinInterpretations[nayin] ?? 'No interpretation available';
-
-      // Special star meaning
-      final starMeaning = specialStarMeanings[specialStar] ??
+      // Use the complete interpretations
+      final nayinMeaning = completeNayinInterpretations[nayin] ?? 'No interpretation available';
+      final starMeaning = completeSpecialStarMeanings[specialStar] ??
           (specialStar == 'N/A' ? 'No special star' : 'Unknown star meaning');
 
       return {
@@ -105,6 +155,7 @@ class BaziAnalysis {
         'starMeaning': starMeaning,
       };
     }
+
 
     // Analyze each pillar
     final yearAnalysis = getPillarAnalysis(yearPillar, 'Year');
@@ -161,6 +212,112 @@ class BaziAnalysis {
       'finalVerdict': finalVerdict,
     };
   }
+
+  // Add new function for Key Interactions analysis
+// Add new function for Key Interactions analysis
+  static List<String> getKeyInteractions({
+    required String dayMaster,
+    required Map<String, String> yearAnalysis,
+    required Map<String, String> monthAnalysis,
+    required Map<String, String> dayAnalysis,
+    required Map<String, String> hourAnalysis,
+  }) {
+    final interactions = <String>[];
+    final pillars = [yearAnalysis, monthAnalysis, dayAnalysis, hourAnalysis];
+
+    // 1. Check for Clashes
+    const clashes = {
+      '子午': 'Rat-Horse Clash: Water-Fire opposition causing tension in relationships/career',
+      '丑未': 'Ox-Goat Clash: Earth-Earth stubbornness creating deadlocks',
+      '寅申': 'Tiger-Monkey Clash: Wood-Metal conflict between growth and discipline',
+      '卯酉': 'Rabbit-Rooster Clash: Wood-Metal friction between gentleness and precision',
+      '辰戌': 'Dragon-Dog Clash: Earth-Earth power struggles for dominance',
+      '巳亥': 'Snake-Pig Clash: Fire-Water hidden tensions and emotional volatility',
+    };
+
+    // 2. Check for Harmonies
+    const harmonies = {
+      '子丑': 'Rat-Ox Harmony: Creates stable Earth energy for foundations',
+      '寅亥': 'Tiger-Pig Harmony: Generates Wood growth for development',
+      '卯戌': 'Rabbit-Dog Harmony: Produces Fire energy for passion/creativity',
+      '辰酉': 'Dragon-Rooster Harmony: Forms Metal energy for precision/success',
+      '巳申': 'Snake-Monkey Harmony: Creates Water flow for adaptability',
+      '午未': 'Horse-Goat Harmony: Sun/Earth combination for warmth/stability',
+    };
+
+    // 3. Check Three Combinations
+    const threeCombinations = {
+      '亥卯未': 'Wood Combination (Pig-Rabbit-Goat): Growth and expansion',
+      '寅午戌': 'Fire Combination (Tiger-Horse-Dog): Energy and transformation',
+      '巳酉丑': 'Metal Combination (Snake-Rooster-Ox): Structure and discipline',
+      '申子辰': 'Water Combination (Monkey-Rat-Dragon): Flow and adaptability',
+    };
+
+    // Analyze each pillar combination
+    for (var i = 0; i < pillars.length; i++) {
+      for (var j = i + 1; j < pillars.length; j++) {
+        final pillar1 = pillars[i];
+        final pillar2 = pillars[j];
+        final branch1 = pillar1['earthlyBranch'] ?? '';
+        final branch2 = pillar2['earthlyBranch'] ?? '';
+
+        // Check clashes
+        if (clashes.containsKey(branch1 + branch2)) {
+        interactions.add('• ${pillar1['pillar']}-${pillar2['pillar']} ${clashes[branch1 + branch2]}');
+        }
+        if (clashes.containsKey(branch2 + branch1)) {
+    interactions.add('• ${pillar2['pillar']}-${pillar1['pillar']} ${clashes[branch2 + branch1]}');
+    }
+
+    // Check harmonies
+    if (harmonies.containsKey(branch1 + branch2)) {
+    interactions.add('• ${pillar1['pillar']}-${pillar2['pillar']} ${harmonies[branch1 + branch2]}');
+    }
+    }
+    }
+
+    // Check for Three Combinations
+    final allBranches = pillars.map((p) => p['earthlyBranch'] ?? '').toList();
+    for (final combo in threeCombinations.keys) {
+    final branches = combo.split('');
+    if (allBranches.contains(branches[0]) &&
+    allBranches.contains(branches[1]) &&
+    allBranches.contains(branches[2])) {
+    interactions.add('• Three Combination Found: ${threeCombinations[combo]}');
+    }
+    }
+
+    // Day Master specific interactions
+    final dayMasterElement = _getElementFromStem(dayMaster);
+    for (final pillar in pillars) {
+    final branchElement = pillar['branchElement'];
+
+    // Productive Cycle
+    if ((dayMasterElement == 'Wood' && branchElement == 'Fire') ||
+    (dayMasterElement == 'Fire' && branchElement == 'Earth') ||
+    (dayMasterElement == 'Earth' && branchElement == 'Metal') ||
+    (dayMasterElement == 'Metal' && branchElement == 'Water') ||
+    (dayMasterElement == 'Water' && branchElement == 'Wood')) {
+    interactions.add('• ${pillar['pillar']} supports your Day Master ($dayMasterElement) through productive cycle');
+    }
+
+    // Controlling Cycle
+    if ((dayMasterElement == 'Wood' && branchElement == 'Earth') ||
+    (dayMasterElement == 'Earth' && branchElement == 'Water') ||
+    (dayMasterElement == 'Water' && branchElement == 'Fire') ||
+    (dayMasterElement == 'Fire' && branchElement == 'Metal') ||
+    (dayMasterElement == 'Metal' && branchElement == 'Wood')) {
+    interactions.add('• ${pillar['pillar']} challenges your Day Master ($dayMasterElement) through controlling cycle');
+    }
+    }
+
+    if (interactions.isEmpty) {
+    interactions.add('• No significant clashes or harmonies found between pillars');
+    }
+
+    return interactions;
+  }
+
 
   static String _getElementFromStem(String stem) {
     const stemElements = {
