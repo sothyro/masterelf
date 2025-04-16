@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/bazi_calculator.dart';
+import '../utils/bazi_analysis.dart';
 
 // Move GlassMorphismButton outside of the BaziPage class
 class GlassMorphismButton extends StatelessWidget {
@@ -749,15 +750,14 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
     DateTime displayDate = isCustomBazi ? selectedDate : DateTime.now();
     TimeOfDay displayTime = isCustomBazi ? selectedTime : TimeOfDay.now();
 
-    // Generate astrological data based on the selected date and time
+    // Generate astrological data
     Map<String, List<String>> astroData = BaziCalculator.getAstroData(
       displayDate,
       displayTime,
     );
 
-    // Format the date and time
-    String formattedDate = DateFormat('yyyy-MM-dd').format(displayDate);
-    String formattedTime = displayTime.format(context);
+    // Get comprehensive analysis
+    final analysis = BaziAnalysis.getBaziAnalysis(displayDate, displayTime, astroData);
 
     showDialog(
       context: context,
@@ -770,7 +770,6 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                 filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                 child: Container(decoration: BoxDecoration(color: Colors.transparent)),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(top: 40.0),
                 child: Container(
@@ -783,104 +782,142 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const SizedBox(height: 30),
-
-                        // Date and Time information
+                        // Header with date/time
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                'អានប៉ាជឺ',
-                                textAlign: TextAlign.center,
+                                'Bazi Analysis',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                '${analysis['date']} at ${analysis['time']}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white70,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Day Master: ${analysis['dayMaster']} (${analysis['dayMasterElement']})',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  fontFamily: 'Dangrek',
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'កើត: $formattedDate\nម៉ោង: $formattedTime',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
+                                  color: _getColorForElement(analysis['dayMasterElement']),
                                   fontFamily: 'Dangrek',
                                 ),
                               ),
                             ],
                           ),
                         ),
-
                         Divider(color: Colors.white.withValues(alpha: 0.5)),
 
-                        // Bazi Pillars explanation
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Table(
-                            columnWidths: const {
-                              0: FlexColumnWidth(1),
-                              1: FlexColumnWidth(2),
-                            },
-                            children: [
-                              _buildPillarRow('ម៉ោង', astroData['Hour'] ?? []),
-                              _buildPillarRow('ថ្ងៃ', astroData['Day'] ?? []),
-                              _buildPillarRow('ខែ', astroData['Month'] ?? []),
-                              _buildPillarRow('ឆ្នាំ', astroData['Year'] ?? []),
-                            ],
-                          ),
-                        ),
+                        // Year Pillar Analysis
+                        _buildPillarSection(analysis['yearAnalysis'], 'Year Pillar'),
+                        Divider(color: Colors.white.withValues(alpha: 0.3)),
 
+                        // Month Pillar Analysis
+                        _buildPillarSection(analysis['monthAnalysis'], 'Month Pillar'),
+                        Divider(color: Colors.white.withValues(alpha: 0.3)),
+
+                        // Day Pillar Analysis
+                        _buildPillarSection(analysis['dayAnalysis'], 'Day Pillar'),
+                        Divider(color: Colors.white.withValues(alpha: 0.3)),
+
+                        // Hour Pillar Analysis
+                        _buildPillarSection(analysis['hourAnalysis'], 'Hour Pillar'),
                         Divider(color: Colors.white.withValues(alpha: 0.5)),
 
-                        // Stars/Gan Zhi information (last row from bazi grid)
+                        // Key Takeaways
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'តារាប៉ាជឺ (干支)',
+                                'Key Takeaways & Predictions',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.red,
                                   fontFamily: 'Dangrek',
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              _buildStarInfo('ម៉ោង', astroData['Hour']?[4] ?? 'N/A'),
-                              _buildStarInfo('ថ្ងៃ', astroData['Day']?[4] ?? 'N/A'),
-                              _buildStarInfo('ខែ', astroData['Month']?[4] ?? 'N/A'),
-                              _buildStarInfo('ឆ្នាំ', astroData['Year']?[4] ?? 'N/A'),
+                              SizedBox(height: 8),
+                              ...(analysis['keyTakeaways'] as List<String>).map((takeaway) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Text(
+                                  takeaway,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              )).toList(),
                             ],
                           ),
                         ),
-
                         Divider(color: Colors.white.withValues(alpha: 0.5)),
 
-                        // General explanation
+                        // Feng Shui Enhancements
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'ពន្យល់ប៉ាជឺ',
+                                'Feng Shui Enhancement',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.red,
                                   fontFamily: 'Dangrek',
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8),
+                              ...(analysis['fengShuiEnhancements'] as List<String>).map((enhancement) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                child: Text(
+                                  enhancement,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontFamily: 'Siemreap',
+                                  ),
+                                ),
+                              )).toList(),
+                            ],
+                          ),
+                        ),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+
+                        // Final Verdict
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
-                                'ប៉ាជឺគឺជាប្រព័ន្ធហោរាសាស្ត្រចិនដែលផ្អែកលើកាលបរិច្ឆេទ និងម៉ោងកំណើត។ វាមាន៤សសរដែលរៀងគ្នាតំណាងឱ្យឆ្នាំ ខែ ថ្ងៃ និងម៉ោងកំណើត។ '
-                                    'គ្រប់សសរមានធាតុអាកាស (天干) និងធាតុដី (地支) ដែលអាចបង្ហាញពីវាសនានិងចរិតលក្ខណៈរបស់មនុស្ស។ '
-                                    'តារាប៉ាជឺ (干支) បង្ហាញពីលក្ខណៈពិសេសនិងឥទ្ធិពលលើជីវិត។',
+                                'Final Verdict',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                analysis['finalVerdict'],
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.white,
@@ -895,8 +932,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-
-              // Logo image (half inside, half outside)
+              // Logo
               Positioned(
                 top: 0,
                 left: 0,
@@ -913,21 +949,92 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
             ],
           ),
           actions: [
-          Center(
-          child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.withValues(alpha: 0.5),
-                foregroundColor: Colors.white,
-                textStyle: const TextStyle(fontFamily: 'Dangrek'),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.withValues(alpha: 0.5),
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontFamily: 'Dangrek'),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
               ),
-              onPressed: () => Navigator.pop(context),
-              child: const Text('យល់ព្រម'),
             ),
-          ),
           ],
         );
       },
     );
+  }
+
+  Widget _buildPillarSection(Map<String, String> pillarData, String title) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Dangrek',
+            ),
+          ),
+          SizedBox(height: 8),
+          Table(
+            columnWidths: const {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
+            children: [
+              _buildAnalysisRow('Heavenly Stem', '${pillarData['heavenlyStem']} (${pillarData['stemElement']})'),
+              _buildAnalysisRow('Earthly Branch', '${pillarData['earthlyBranch']} (${pillarData['branchElement']})'),
+              _buildAnalysisRow('Hidden Stems', '${pillarData['hiddenStems']} (${pillarData['hiddenElements']})'),
+              _buildAnalysisRow('Nayin', '${pillarData['nayin']}: ${pillarData['nayinMeaning']}'),
+              if (pillarData['specialStar'] != 'N/A')
+                _buildAnalysisRow('Special Star', '${pillarData['specialStar']}: ${pillarData['starMeaning']}'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  TableRow _buildAnalysisRow(String label, String value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            '$label:',
+            style: TextStyle(
+              color: Colors.white70,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Dangrek',
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Text(
+            value,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Siemreap',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getColorForElement(String? element) {
+    switch (element) {
+      case 'Wood': return Colors.green;
+      case 'Fire': return Colors.red;
+      case 'Earth': return Colors.yellow;
+      case 'Metal': return Colors.white;
+      case 'Water': return Colors.blue;
+      default: return Colors.white;
+    }
   }
 
 // Helper method to build pillar information row

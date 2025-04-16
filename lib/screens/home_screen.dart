@@ -34,18 +34,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   ];
 
   final Map<String, List<String>> _dropdownItems = {
-    '🔥ហុងស៊ុយយុគ9': ['វីដេអូ ·Vlogs', 'សៀវភៅយុគ9','វត្ថុកែហុងស៊ុយ'],
-    '🧧លាភហេងឆ្នាំថ្មី': ['រាសីឆ្នាំទាំង12', 'ចូលរួមកម្មវិធី', 'ដេគ័រកាត់ឆុង'],//['តារាសាស្ត្រ·飞星', 'ទ្វារវាសនា·奇门', 'អ៊ីជីង·易經'],
-    '☯️ម៉ាស្ទ័រអេល': ['ទំនាក់ទំនង', 'ណាត់ពិភាក្សា', 'អំពីកម្មវិធីនេះ'],
+    '🔥ហុងស៊ុយយុគ9': ['វីដេអូ ·Vlogs', 'សៀវភៅយុគ9','អ៊ីជីង·易經9'],
+    '🧧លាភហេងឆ្នាំថ្មី': ['រាសីឆ្នាំទាំង12','ដេគ័រកាត់ឆុង','ហាងហុងស៊ុយ'],//['តារាសាស្ត្រ·飞星', 'ទ្វារវាសនា·奇门', 'អ៊ីជីង·易經'],
+    '☯️ម៉ាស្ទ័រអេល': ['កម្មវិធីថ្មីៗ','ទំនាក់ទំនង','ណាត់ពិភាក្សា'],
   };
 
   final Map<String, String> _itemUrls = {
     'វីដេអូ ·Vlogs': 'https://period9.masterelf.vip/vlogs',
     'សៀវភៅយុគ9': 'https://period9.masterelf.vip/period9',
-    'វត្ថុកែហុងស៊ុយ': 'https://period9.masterelf.vip/store',
+    'អ៊ីជីង·易經9': 'https://period9.masterelf.vip/iching9',
     'រាសីឆ្នាំទាំង12': 'https://period9.masterelf.vip/zodiac',
-    'ចូលរួមកម្មវិធី': 'https://period9.masterelf.vip/event',
     'ដេគ័រកាត់ឆុង': 'https://period9.masterelf.vip/fengshuicure',
+    'ហាងហុងស៊ុយ': 'https://period9.masterelf.vip/store',
+    'កម្មវិធីថ្មីៗ': 'https://period9.masterelf.vip/event',
     'ណាត់ពិភាក្សា': 'https://period9.masterelf.vip/appointment',
     //'អំពីកម្មវិធីយុគ9': 'https://masterelf.vip/contact/',
   };
