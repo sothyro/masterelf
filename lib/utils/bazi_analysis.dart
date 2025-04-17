@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -68,53 +70,6 @@ class BaziAnalysis {
       '灾煞': 'Disaster Star - Warning of accidents or crises. Need for caution in specified areas.',
       '亡神': 'Death Spirit - Hidden dangers or health concerns. Requires preventive measures.',
     };
-
-    // Define all possible Nayin interpretations
-    // const nayinInterpretations = {
-    //   '海中金': 'Hidden treasure, patient but ambitious',
-    //   '剑锋金': 'Sharp as a sword, decisive and cutting',
-    //   '白蜡金': 'Delicate metal, refined but fragile',
-    //   '砂石金': 'Unrefined ore, hardworking and persistent',
-    //   '金箔金': 'Ornamental gold, artistic and vain',
-    //   '钗钏金': 'Jewelry gold, luxury-loving and elegant',
-    //   '大林木': 'Forest wood, protective and nurturing',
-    //   '杨柳木': 'Willow wood, flexible and emotional',
-    //   '松柏木': 'Pine wood, resilient and principled',
-    //   '平地木': 'Shrub wood, humble and steady',
-    //   '桑柘木': 'Mulberry wood, generous and family-oriented',
-    //   '石榴木': 'Pomegranate wood, defensive and passionate',
-    //   '涧下水': 'Mountain stream, gentle and introspective',
-    //   '大溪水': 'Big river, adventurous and restless',
-    //   '长流水': 'Long flowing water, philosophical and deep',
-    //   '天河水': 'Sky river, visionary and detached',
-    //   '泉中水': 'Spring water, mysterious and intuitive',
-    //   '大海水': 'Ocean water, charismatic and unpredictable',
-    //   '炉中火': 'Furnace fire, passionate and focused',
-    //   '山头火': 'Mountain fire, independent and impulsive',
-    //   '霹雳火': 'Lightning fire, revolutionary and explosive',
-    //   '山下火': 'Foot-hill fire, warm but fading energy',
-    //   '覆灯火': 'Lantern fire, intellectual and guarded',
-    //   '天上火': 'Sun fire, bold and dominant',
-    //   '壁上土': 'Wall earth, defensive and stubborn',
-    //   '城头土': 'City wall earth, loyal and traditional',
-    //   '沙中土': 'Desert sand, flexible but unstable',
-    //   '路旁土': 'Roadside earth, practical and transient',
-    //   '大驿土': 'Highway earth, sociable and adaptable',
-    //   '屋上土': 'Roof earth, protective and home-loving',
-    // };
-    //
-    // // Define special star interpretations
-    // const specialStarMeanings = {
-    //   '天官': 'Heavenly Official - Bureaucratic influence, authority',
-    //   '劫煞': 'Robbery Star - Risk of financial loss or theft',
-    //   '驿马': 'Travel Horse - Movement, change, expansion',
-    //   '文昌': 'Academic Star - Success in studies and knowledge',
-    //   '红鸾': 'Peach Blossom - Romantic opportunities',
-    //   '孤辰': 'Loneliness Star - Isolation or difficulty bonding',
-    //   '寡宿': 'Widow Star - Emotional distance in relationships',
-    //   '羊刃': 'Blade Star - Aggression and potential conflict',
-    //   '将星': 'General Star - Leadership and authority',
-    // };
 
     // Helper function to get pillar analysis
     Map<String, String> getPillarAnalysis(
@@ -525,3 +480,50 @@ class BaziAnalysis {
     return weakest;
   }
 }
+
+// Define all possible Nayin interpretations
+// const nayinInterpretations = {
+//   '海中金': 'Hidden treasure, patient but ambitious',
+//   '剑锋金': 'Sharp as a sword, decisive and cutting',
+//   '白蜡金': 'Delicate metal, refined but fragile',
+//   '砂石金': 'Unrefined ore, hardworking and persistent',
+//   '金箔金': 'Ornamental gold, artistic and vain',
+//   '钗钏金': 'Jewelry gold, luxury-loving and elegant',
+//   '大林木': 'Forest wood, protective and nurturing',
+//   '杨柳木': 'Willow wood, flexible and emotional',
+//   '松柏木': 'Pine wood, resilient and principled',
+//   '平地木': 'Shrub wood, humble and steady',
+//   '桑柘木': 'Mulberry wood, generous and family-oriented',
+//   '石榴木': 'Pomegranate wood, defensive and passionate',
+//   '涧下水': 'Mountain stream, gentle and introspective',
+//   '大溪水': 'Big river, adventurous and restless',
+//   '长流水': 'Long flowing water, philosophical and deep',
+//   '天河水': 'Sky river, visionary and detached',
+//   '泉中水': 'Spring water, mysterious and intuitive',
+//   '大海水': 'Ocean water, charismatic and unpredictable',
+//   '炉中火': 'Furnace fire, passionate and focused',
+//   '山头火': 'Mountain fire, independent and impulsive',
+//   '霹雳火': 'Lightning fire, revolutionary and explosive',
+//   '山下火': 'Foot-hill fire, warm but fading energy',
+//   '覆灯火': 'Lantern fire, intellectual and guarded',
+//   '天上火': 'Sun fire, bold and dominant',
+//   '壁上土': 'Wall earth, defensive and stubborn',
+//   '城头土': 'City wall earth, loyal and traditional',
+//   '沙中土': 'Desert sand, flexible but unstable',
+//   '路旁土': 'Roadside earth, practical and transient',
+//   '大驿土': 'Highway earth, sociable and adaptable',
+//   '屋上土': 'Roof earth, protective and home-loving',
+// };
+//
+// // Define special star interpretations
+// const specialStarMeanings = {
+//   '天官': 'Heavenly Official - Bureaucratic influence, authority',
+//   '劫煞': 'Robbery Star - Risk of financial loss or theft',
+//   '驿马': 'Travel Horse - Movement, change, expansion',
+//   '文昌': 'Academic Star - Success in studies and knowledge',
+//   '红鸾': 'Peach Blossom - Romantic opportunities',
+//   '孤辰': 'Loneliness Star - Isolation or difficulty bonding',
+//   '寡宿': 'Widow Star - Emotional distance in relationships',
+//   '羊刃': 'Blade Star - Aggression and potential conflict',
+//   '将星': 'General Star - Leadership and authority',
+// };
