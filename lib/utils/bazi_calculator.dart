@@ -140,6 +140,7 @@ class BaziCalculator {
     };
 
     // Get the info for the current star number
+    // ignore: unused_local_variable
     Map<String, String> currentStarInfo = starInfo[starNumber]!;
 
     return {

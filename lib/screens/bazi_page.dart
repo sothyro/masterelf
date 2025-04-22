@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, unnecessary_to_list_in_spreads
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
