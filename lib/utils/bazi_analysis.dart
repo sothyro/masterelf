@@ -21,54 +21,54 @@ class BaziAnalysis {
 
     // Add to the top of the file
     const completeNayinInterpretations = {
-      '海中金': 'Sea Gold - Hidden potential that needs time to develop, like treasure in the ocean. Represents patience and long-term growth.',
-      '剑锋金': 'Sword Gold - Sharp and decisive like a blade. Indicates strong willpower and ability to cut through obstacles.',
-      '白蜡金': 'White Wax Gold - Delicate and refined but can melt under pressure. Needs protection and careful handling.',
-      '砂石金': 'Sand Gold - Unrefined potential that requires work. Represents perseverance through difficulties.',
-      '金箔金': 'Gold Foil - Decorative and beautiful. Indicates artistic talent but can be superficial if not grounded.',
-      '钗钏金': 'Hairpin Gold - Valuable and elegant. Represents refinement and appreciation for beauty.',
-      '大林木': 'Forest Wood - Strong and protective like a giant tree. Provides shelter and support for others.',
-      '杨柳木': 'Willow Wood - Flexible and adaptable. Can bend without breaking in difficult situations.',
-      '松柏木': 'Pine Wood - Evergreen and resilient. Maintains strength through all seasons of life.',
-      '平地木': 'Flatland Wood - Humble and steady growth. Not flashy but reliable and enduring.',
+      '海中金': 'មាសមហាសមុទ្រ - សក្តានុពលអ្នកច្រើនណាស់ គ្រាន់តែត្រូវការវេលាដុសខាត់ អ្នកប្រៀបបានទៅនឹងកំណព្វទ្រព្យក្នុងមហាសាគរ។ តារាសំណាងរបស់អ្នកតំណាងភាពអំណត់អត់ធ្មត និងការលូតលាស់យូរអង្វែង។',
+      '剑锋金': 'ដាវមាស - មុតស្រួច ហើយសម្រេចចិត្តដាច់ណាត់ដូចដាវដកចេញពីស្រោម។ ស្តែងឲ្យឃើញនូវភាពមោះមុតដ៏ខ្លាំងក្លា និងសមត្ថភាពដែលអាចជំនះបាននូវគ្រប់ឧបសគ្គ។',
+      '白蜡金': 'មាសក្រមួន ស - ផុយស្រួយបន្តិច តែច្នៃរួចជាស្រេច មានតម្លៃខ្លាំងគ្រាន់តែងាយរលាយពេលមានសំពាធរឺកំដៅ ម្លោះហើយត្រូវការការពារ និងថែរក្សាឲ្យម៉ត់ចត់បន្តិច។',
+      '砂石金': 'ខ្សាច់មាស - សក្តានុពលដែលមិនទាន់មានអ្នកច្នៃនៅឡើយ ម្លោះហើយសក្តានុពលនេះទាមទាឲ្យមានការលុតដំ។ តារាអ្នកតំណាងដោយការតស៊ូរជំនះសេចក្តីលំបាក។',
+      '金箔金': 'ក្រដាសមាស - សម្រស់ស្រសស្អាតផូរផង់ តុបតែងកាន់តែប្រសើរ។ ស្តែងចេញពីទេពកោសល្យសិល្បះរបស់អ្នក តែពេលខ្លះវាហាក់ដូចជារវើរវាយពេក ដូច្នេះត្រូវចេះទប់លំនឹងស្មារតី។',
+      '钗钏金': 'សក់មាស - មានគុណតម្លៃ ហើយថ្លៃថ្នូរណាស់។ តំណាងនូវការសម្រិតសម្រាំងដ៏ល្អឥតខ្ចោះ និងការចេះរៀបចំប្រកបដោយសម្រស់ដ៏ស្រស់បវរ។',
+      '大林木': 'ដើមឈើក្នុងព្រៃធំ - រឹងមាំ ហើយអភិរក្សាដូចជាដើមឈើដ៏ធំស្កឹមស្កៃ។ អ្នកផ្តល់ទីជម្រកដ៏រឹងមាំ និងកក់ក្តៅសម្រាប់អ្នកដទៃ។',
+      '杨柳木': 'ព្រៃរបោះ - មានភាពបត់បែន និងងាយសម្របខ្លួន។ អោយពត់ពែនទៅតាមកាលះទេសះ អាកាសធាតុ ពិសេសនឹងមិនដួលរលំពេលជួបស្ថានការណ៍លំបាក។',
+      '松柏木': 'ព្រៃស្រល់ - បៃតងជានិច និងធន់ខ្លាំង។ រក្សាកំលាំងឋាមពលរឹងមាំបានគ្រប់រដូវនៃជីវិត រស់បានយូរអង្វែង មិនងាយសាបសូន្យ។',
+      '平地木': 'ព្រៃឈើវាលទំនាប - ដាក់ខ្លួន មិនកោងកាច ហើយលូតលាស់បានរហ័ស។ មិនអំនួត ក៏ប៉ុន្តែទុកចិត្តបាន ហើយអត់ធន់សម្បើមណាស់។',
       '桑柘木': 'Mulberry Wood - Fruit-bearing and nurturing. Provides sustenance for others.',
       '石榴木': 'Pomegranate Wood - Protective with thorns. Strong boundaries with sweet rewards inside.',
-      '涧下水': 'Mountain Stream - Clear and purposeful flow. Small but determined path through life.',
-      '大溪水': 'Big River - Powerful current that can change course. Represents major life changes.',
-      '长流水': 'Long Flowing Water - Continuous and persistent. Steady progress over long periods.',
-      '天河水': 'Sky River - Heavenly and detached. Big-picture thinking but may lack practicality.',
-      '泉中水': 'Spring Water - Pure and emerging from deep sources. Intuitive and mysterious nature.',
-      '大海水': 'Ocean Water - Boundless and powerful. Can be overwhelming but full of potential.',
-      '炉中火': 'Furnace Fire - Contained and focused energy. Strong passion with discipline.',
-      '山头火': 'Mountain Fire - Wild and independent. Burns brightly but may lack control.',
-      '霹雳火': 'Lightning Fire - Sudden and dramatic. Quick transformations and revelations.',
-      '山下火': 'Foot-hill Fire - Diminishing energy. Needs rekindling to maintain passion.',
-      '覆灯火': 'Lantern Fire - Intellectual light. Provides guidance but needs protection from winds.',
-      '天上火': 'Sun Fire - Dominant and radiant. Natural leadership with powerful presence.',
-      '壁上土': 'Wall Earth - Defensive and strong boundaries. Provides security but can isolate.',
-      '城头土': 'City Wall Earth - Protective of community. Traditional values and loyalty.',
-      '沙中土': 'Desert Sand - Shifting and unstable. Needs anchoring to find stability.',
-      '路旁土': 'Roadside Earth - Practical and transient. Helps others on their journeys.',
-      '大驿土': 'Highway Earth - Connects people and ideas. Sociable and adaptable nature.',
-      '屋上土': 'Roof Earth - Protective shelter. Creates safe spaces for family and home.',
+      '涧下水': 'ខ្សែទឹកចង្កេះភ្នំ - ថ្លាឆ្វង់ ហើយហូរមានទិសដៅ។ ខ្សែទឹកតូច តែមានទិសដៅច្បាស់លាស់ ហូរមិនរអាក់រអួល ជីវិតនិងប្រព្រឹត្តិទៅដោយរលូន។',
+      '大溪水': 'មហាទន្លេ - ខ្សែទឹកដ័មានអំណាចខ្លាំងក្លាក្រៃ ហើយអាចបង្វែរទិសនៃប្រភពទឹកទាំងមូលទៀតផង។ ម្លោះហើយកត្តានេះក៏តំណាងឲ្យការផ្លាស់ប្តូរទ្រង់ទ្រាយធំនៃជីវិតរបស់អ្នកផងដែរ។',
+      '长流水': 'ខ្សែរទឹកហូរដ៏វែងអន្លាយ - បន្តរដំណើររហូត ហើយអត់ធន់ និងមានភាពរុញច្រានទៅមុខជានិច្ចមិនរាថយឡើយ។ ដំណើររហ័សរហួនបើទោះជាត្រូវចំណាយពេលវេលាយូរអង្វែងយ៉ាងណាក៏ដោយ។',
+      '天河水': 'ទន្លេឋានសួគ៌ - នៅលើមេឃ ហើយឆ្ងាយផុតពីដៃ។ មហិច្ឆតាធំ គំនិតវែងឆ្ងាយក៏ប៉ុន្តែខ្វះការអនុវត្តន៍ជាក់ស្តែង មិនសូវឃើញលទ្ធផលដែលជាទីគាប់ចិត្ត។',
+      '泉中水': 'ទឹកបរិសុទ្ធរដូវផ្ការីក - ស្រស់បវរ ទឹកហូរចេញពីប្រភពដ៏ស្រស់ត្រកាលបរិសុទ្ធ។ មានគំនិតផ្តួចផ្តើមច្រើន និងមានធម្មជាតិអាថកំបាំង។',
+      '大海水': 'ទឹកមហាសមុទ្រ - ធំល្វឹងល្វើយសឹងរកព្រំដែនគ្មាន ហើយមានអំណាចណាស់។ ពេលខ្លះអាចលើសហួស អាចមានអំណាចជ្រុល តែគឺពិតជាប្រកបដោយសក្តានុពលពិតប្រាកដមែន',
+      '炉中火': 'ភ្លើងឆេះសន្ធោសន្ធៅ - ឋាមពលប្រមូលផ្តុំ ហើយស្រួចស្រាលខ្លាំងល្អណាស់។ មានចំណង់ចំណូលចិត្តខ្លាំងហើយពិតប្រាកដ ប្រកបដោយវិន័យគត់មត់។',
+      '山头火': 'ភ្លើងលើភ្នំ - អំណាចព្រៃ អំណាចដែលគ្មានអ្នកស្គាល់ ហើយឯករាជ្យម្ចាស់ការណាស់។ ឆេះសន្ធោសន្ធៅភ្លឺចិញ្ចាច តែពេលខ្លះពិបាកគ្រប់គ្រងណាស់។',
+      '霹雳火': 'ភ្លើងរន្ទះ - ភ្លាមៗ ទាន់ហន់ ហើយកក្រើកតែម្តង។ ប្រែរូបប្រែកាយលឿនរហ័ស បត់បែនខ្លាំង ហើយងាយយល់ពីស្ថានភាពនៅនឹងមុខ។',
+      '山下火': 'ភ្លើងជ្រលងភ្នំ - ឋាមពលដែលកំពុងតែបាត់បង់។ ចាំបាច់ត្រូវការកំលាំងធាតុចូលបន្ថែម បញ្ឆេះឡើងវិញដើម្បីរក្សាចំណង់ និងការតាំងចិត្តទៅមុខ។',
+      '覆灯火': 'ភ្លើងគោម - ពន្លឺនៃចំណេះដឹងដ័ស្រទន់។ ផ្តល់ឲ្យនូវមគ្គុទេសក៍ចង្អុលបង្ហាញផ្លូវដ៏ប្រសើរ ក៏ប៉ុន្តែទាមទាការការពារពីខ្សល់ដែលអាចនឹងធ្វើឲ្យគោមរលត់។',
+      '天上火': 'ភ្លើងសុរិយព្រះអាទិត្យ - ក្តោបក្តាប់លើសគេ តេជៈរង្សីភ្លឺចិញ្ចាច។ ធម្មជាតិកើតមកជាអ្នកដឹកនាំប្រកបដោយឋាមពល និងអំណាច។ ឲ្យតែមានវត្តមាន គឺគេខ្លាចរអារណាស់។',
+      '壁上土': 'ជញ្ជាំងផែនដី - ពូកែការពារខ្លួន និងមានព្រំប្រទល់រឹងមាំ ជាដែនសីមាដែលការពារបាន។ ផ្តល់នូវសុខសុវត្ថិភាពដ៏មានប្រសិទ្ធភាព ក៏ប៉ុន្តែឯកកោនិងដាច់ពីគេណាស់។',
+      '城头土': 'កំផែងដីការពាររាជធានី - កិច្ចការពារ និងបម្រើប្រជាជន សហគមន៍ និងសាច់ញាតិ។ គុណតម្លៃពីដូនតា រឺក្រុមគ្រួសារនឹងត្រូវបានថែរក្សា ហើយប្រកបទៅដោយភក្តីភាព។',
+      '沙中土': 'ដៃខ្សាច់នៃវាលរហោឋាន - បក់ផាត់គ្មានគោលដៅ រេរាតាមខ្យល់គ្មានលំនឹង។ ត្រូវការស្វែងរកលំនឹងភាព រកទីឈរជើងឲ្យច្បាស់លាស់ ជៀសវាងរសាត់ឥតព្រំដែន។',
+      '路旁土': 'ដីតាមដងផ្លូវ - ប្រើប្រាស់បាន មានជីវជាតិ មានតម្លៃ។ និយាយរួមគេពឹងពាក់បាន ចេះជួយអ្នកដ៏ទៃតាមដំណើរជីវិតរបស់គេ។',
+      '大驿土': 'ដីផ្លូវវែងឆ្ងាយដាច់សង្វែង - ផ្សារភ្ជាប់មនុស្ស និងគំនិតបញ្ញា។ មានធម្មជាតិជាអ្នកចូលក្នុងសង្គម ងាយចុះសម្រុងនិងគេ ហើយងាយភ្ជាប់ទំនាក់ទំនងជាមួយមនុស្សទូទៅ។',
+      '屋上土': 'ដឺក្បឿងប្រក់ - ជាអ្នកផ្តល់នូវជំរកសម្រាប់អ្នកដ៏ទៃ។ កូនចៅពឹងពាក់បាន ហាលថ្ងៃហាលភ្លៀងដើម្បីគេ។ អ្នកបង្កើតទីកន្លែងសុខក្សេមក្សាន្តសម្រាប់ក្រុមគ្រួសារ និងមនុស្សពឹងពាក់ឲ្យកក់ក្តៅ។',
     };
 
     const completeSpecialStarMeanings = {
-      '天官': 'Heavenly Official - Strong bureaucratic influence, government connections, or structured authority in life.',
-      '劫煞': 'Robbery Star - Risk of unexpected losses, theft, or financial leaks. Need for extra protection.',
-      '驿马': 'Travel Horse - Frequent movement, changes, or international opportunities. Indicates a mobile lifestyle.',
-      '文昌': 'Academic Star - Strong literary and learning abilities. Success in studies and knowledge-based pursuits.',
-      '红鸾': 'Peach Blossom - Romantic opportunities and charm. Strong appeal to others in relationships.',
-      '孤辰': 'Loneliness Star - Tendency toward isolation or difficulty forming deep connections.',
-      '寡宿': 'Widow Star - Emotional distance in relationships. May indicate late marriage or solitude.',
-      '羊刃': 'Blade Star - Cutting energy that can lead to conflicts. Needs careful channeling.',
-      '将星': 'General Star - Natural leadership abilities and authority. Strong career potential.',
-      '天乙贵人': 'Nobleman Star - Help from influential people. Lucky encounters that assist your path.',
-      '太极贵人': 'Wisdom Star - Spiritual insight and philosophical depth. Attraction to metaphysics.',
+      '天官': 'វីរៈមន្ត្រីឋានសួគ៌ Heavenly Official - មានអំណាចកិច្ចការរាជការធំធេង ឋានៈខ្ពស់ខ្ពស់ គេខ្លាចរអារ, មានបណ្តាញក្នុងរដ្ឋាភិបាល, បើជីវិតគឺមានឋានានុក្រមចេះរៀបចំរចនាសម្ព័ន្ធរស់នៅសម្រាប់ជីវិត។',
+      '劫煞': 'ផ្កាយចោ Robbery Star - ហារនិភ័យច្រើន ងាយបង់ទ្រព្យដោយមិនបានរំពឹងទុក, ចោលួច និងមនុស្សក្បត់, រឺធ្លាយហិបលុយទៅក្រោដោយងាយ។ ត្រូវចេះប្រុងប្រយ័ត្នឲ្យមែនទែន។',
+      '驿马': 'សេះផាយទៅមុខ Travel Horse - ដំណើរញឹកញាប់, មានការផ្លាស់ប្តូរ, រឺមានកិច្ចការដែលជាឧកាសនៅតាមបណ្តារប្រទេសដទៃច្រើន។ ជីវិតអ្នកចេញ ទើបបានសុី។',
+      '文昌': 'តារានិស្សិត Academic Star - ចំណេះដឹងជ្រៅជ្រះ រៀនអ្វីថ្មីឆាប់ចាប់បាន ពូកែរស្វែងយល់ណាស់។ ជោគជ័យធំបើរៀនបានខ្ពស់ ហើយបើរកសុីវិញពូកែតាមទាន់របររកសុីថ្មីៗ។',
+      '红鸾': 'ផ្កាសូដា Peach Blossom - មនោសញ្ជេតនាជាធំ គួរឲ្យបេតី មានមន្តស្នេហ៍ ទាក់ទាញណាស់។ សំបូរគូស្នេហ៍ ហើយក៏អភ័ព្វនិងស្នេហាណាស់ដែរ។',
+      '孤辰': 'តារាឯកការ Loneliness Star - ចូលចិត្តសំងំតែម្នាក់ឯក ចូលចិត្តឯករាជ្យ សេរីភាព ពិបាកបង្កើយទំនាក់ទំនងសុីជម្រៅជាមួយមនុស្សទូទៅ ព្រោះមិនចង់ឲ្យគេលូកលាន់រឿងខ្លួន។',
+      '寡宿': 'តារាពោះម៉ាយ Widow Star - មិនសូវចាប់អារម្មណ៍រឿងស្នេហា គ្រួសារ រឺសម្ព័ន្ធភាពវែងឆ្ងាយ។ នឹងរៀបការយឺត អាយុច្រើនទើបរៀបការ រឺដាក់ចិត្តដាក់កាយក្នុងសម្ព័ន្ធមេត្រី។',
+      '羊刃': 'តារាដាវរន្ទះ Blade Star - ឋាមពលវៀងវៃ ស្រួចស្រាវងាយនឹងមានជម្លោះ។ ប្រយ័ត្នរឿងសេពគប់ និងជួយគេឥតប្រយោជន័ នាំទុក្ខដាក់ខ្លួន។',
+      '将星': 'តារាមេទ័ព General Star - កើតមកជាអ្នកដឹកនាំគេ មានសមត្ថភាព និងសមត្ថកិច្ចលើហ្វូងមនុស្ស និងការងាររកសុី។ មានសក្តានុពលខ្លាំងណាស់ក្នុងការងាររកសុី។',
+      '天乙贵人': 'តារាឧត្តមមន្ត្រី Nobleman Star - នឹងមានគេអ្នកមានស័ក្តធំជួយជ្រោមជ្រែងអាណិតស្រលាញ់។ សំណាងច្រើនក្នុងផ្លូវជីវិត គឹជួយជ្រោមជ្រែងច្រើន។',
+      '太极贵人': 'តារាចំណេះដឹង Wisdom Star - ផ្លូវលោកក៏ពូកែ ផ្លូវសាសនា និងធម៌ក៏ពូកែ បើរឿងទស្សនៈវិជ្ជា យុទ្ធសាស្ត្ររឹតតែពូកែ។ បើធ្វើគ្រូគេគឺពូកែ បើបួសរៀននឹងក្លាយជាមេសាសនា។',
       '华盖': 'Canopy Star - Artistic talent and unconventional thinking. May feel misunderstood.',
-      '金舆': 'Golden Chariot - Material comfort and luxury. Indicates wealth potential.',
-      '灾煞': 'Disaster Star - Warning of accidents or crises. Need for caution in specified areas.',
-      '亡神': 'Death Spirit - Hidden dangers or health concerns. Requires preventive measures.',
+      '金舆': 'រាជរថមាស Golden Chariot - សម្បូរទ្រព្យ និងគ្រឿងប្រណីត ក្នុងជីវិតនឹងជួបរឿងស្តុកស្តម្ភ មិនខ្វះឡើយទ្រព្យសម្បត្តិ។',
+      '灾煞': 'តារាគ្រោះមហន្តរាយ Disaster Star - ប្រយ័ត្នគ្រោះកាច វិបត្តិរាំងជល់ និងឧប្បត្តិទាន់ហន់។ ត្រូវចេះមើលភូមិសាស្រ្តរស់នៅ ធ្វើការ និងធ្វើដំណើរទើបសមប្រកប។',
+      '亡神': 'តារាវិញ្ញាណបិសាច Death Spirit - មានគ្រោះកំណើតមើលមិនឃើញ ដូចម្ជុលលាក់មុខ មានជំងឺប្រចាំកាយ ប្រហេសនឹងគ្រោះធំ។ ទាមទាឲ្យរៀបខ្លួន ពិនិត្យសុខភាព ឲ្យទៀងទាត់។',
     };
 
     // Helper function to get pillar analysis
@@ -92,9 +92,9 @@ class BaziAnalysis {
       final hiddenElements = hiddenStems.split('').map(_getElementFromStem).join(', ');
 
       // Use the complete interpretations
-      final nayinMeaning = completeNayinInterpretations[nayin] ?? 'No interpretation available';
+      final nayinMeaning = completeNayinInterpretations[nayin] ?? 'សូមបញ្ជាក់ជាមួយMaster';
       final starMeaning = completeSpecialStarMeanings[specialStar] ??
-          (specialStar == 'N/A' ? 'No special star' : 'Unknown star meaning');
+          (specialStar == 'N/A' ? 'No special star' : 'សូមបញ្ជាក់ជាមួយMaster');
 
       return {
         'pillar': pillarName,
@@ -182,30 +182,30 @@ class BaziAnalysis {
 
     // 1. Check for Clashes
     const clashes = {
-      '子午': 'Rat-Horse Clash: Water-Fire opposition causing tension in relationships/career',
-      '丑未': 'Ox-Goat Clash: Earth-Earth stubbornness creating deadlocks',
-      '寅申': 'Tiger-Monkey Clash: Wood-Metal conflict between growth and discipline',
-      '卯酉': 'Rabbit-Rooster Clash: Wood-Metal friction between gentleness and precision',
-      '辰戌': 'Dragon-Dog Clash: Earth-Earth power struggles for dominance',
-      '巳亥': 'Snake-Pig Clash: Fire-Water hidden tensions and emotional volatility',
+      '子午': 'កណ្តុរ និង សេះ ឆុងគ្នា : ទឹក មិនត្រូវនឹង ភ្លើង បង្កើតទំនាស់ភាពតានតឹងក្នុងទំនាក់ទំនង និងការងាររកសុី',
+      '丑未': 'គោ និង ពពែ ឆុងគ្នា : ដី ប៉ះ ដី រឹងក្បាលណាស់ បង្កើតភាពជាប់គាំងទៅមុខមិនរួច រកសុីមិនឡើង',
+      '寅申': 'ខ្លា និង ស្វា ឆុងគ្នា : ឈើ និង ដែក ឆុងគ្នា ប្រទាញប្រទុងរវាងការលូតលាស់ និងវិន័យច្បាប់ទំលាប់',
+      '卯酉': 'ទន្សាយ និង មាន់ ឆុងគ្នា : ឈើ និង ដែក កកិតគ្នា បុកផុយ រិចរិលយូរទៅនឹងខូចខាត ឈប់ដំណើរការ។',
+      '辰戌': 'នាគរាជ និង ឆ្កែ ឆុងគ្នា : ដី ប៉ះ ដី ដណ្តើមអំណាចគ្នា ដណ្តើមតំបន់ត្រួតតារគ្នា',
+      '巳亥': 'ពស់ និង ជ្រួក ឆុងគ្នា: ភ្លើង និង ទឹក បង្ករសង្គ្រាមត្រជាក់ អារម្មណ៍គុំគួនចងអាឃាតគ្នា',
     };
 
     // 2. Check for Harmonies
     const harmonies = {
-      '子丑': 'Rat-Ox Harmony: Creates stable Earth energy for foundations',
-      '寅亥': 'Tiger-Pig Harmony: Generates Wood growth for development',
-      '卯戌': 'Rabbit-Dog Harmony: Produces Fire energy for passion/creativity',
-      '辰酉': 'Dragon-Rooster Harmony: Forms Metal energy for precision/success',
-      '巳申': 'Snake-Monkey Harmony: Creates Water flow for adaptability',
-      '午未': 'Horse-Goat Harmony: Sun/Earth combination for warmth/stability',
+      '子丑': 'កណ្តុ និង គោ សុខដុមរមនា : ឆុងហេង បង្កើតលំនឹងឋាមពលដី ចាក់គ្រឹះរឹងមាំ',
+      '寅亥': 'ខ្លា និង ជ្រូក សុខដុមរមនា : ជម្រុញឲ្យកើតមានការលូតលាស់របស់ធាតុឈើ នឹងឃើញការរីកចម្រើនធំៗ',
+      '卯戌': 'ទន្សាយ និង ឆ្កែ សុខដុមរមនា : បង្កើនឋាមពលភ្លើង ឲ្យស្រលាញ់គ្នា មានគំនិតច្នៃប្រឌិត រកសុីធ្វើការជុំគ្នា មិនចាញ់គេ',
+      '辰酉': 'នាគរាជ និង មាន់ សុខដុមរមនា : បង្កើយនូវឋាមពលមាសដែក ជោគជ័យច្បាស់នៅនឹងមុខ បានសម្រេចមិនខកខានឡើយ',
+      '巳申': 'ពស់ និង ស្វា សុខដុមរមនា: បង្កើតលំហូរទឹក ដំណើរជីវិតនឹងរលូត លាភចូលឥតឈប់ ងាយចូលសង្គមណាស់',
+      '午未': 'សេះ និង ពពែ សុខដុមរមនា: ព្រះអាទិត្យ និង ផែនដី ឋាមពលសណ្តោសប្រណីនិងគ្នា ធ្វើឲ្យកក់ក្តៅ ហើយមានលំនឹងរឹងមាំ',
     };
 
     // 3. Check Three Combinations
     const threeCombinations = {
-      '亥卯未': 'Wood Combination (Pig-Rabbit-Goat): Growth and expansion',
-      '寅午戌': 'Fire Combination (Tiger-Horse-Dog): Energy and transformation',
-      '巳酉丑': 'Metal Combination (Snake-Rooster-Ox): Structure and discipline',
-      '申子辰': 'Water Combination (Monkey-Rat-Dragon): Flow and adaptability',
+      '亥卯未': 'កំលាំងធាតុឈើ សង្រួមចូលគ្នា Wood Combination (ជ្រូក-ទន្សាយ-ពពែ): លូតលាស់ បែកសាខា និងបង្រីកជានិច្ច',
+      '寅午戌': 'កំលាំងធាតុភ្លើង សង្រួមចូលគ្នា Fire Combination (ខ្លា-សេះ-ឆ្កែ): មានឋាមពលដ៏អស្ចារ្យ ហើយងាយប្រែឧកាសទៅជាលាភ',
+      '巳酉丑': 'កំលាំងធាតុមាស សង្រូមចូលគ្នា (ពស់-មាន់-គោ): មានគ្រឹះរចនាសម្ព័ន្ធរឹងមាំ មានវិន័យ គ្រោះសត្រូវធ្វើមិនបែក',
+      '申子辰': 'កំលាំងធាតុទឹក សង្រួមចូលគ្នា (ស្វា-កណ្តុរ-នាគ): លំហូរលាភឥតឈប់ឈរ ហើយងាយបត់បែនគ្រប់ស្ថានការណ៍',
     };
 
     // Analyze each pillar combination
@@ -267,7 +267,7 @@ class BaziAnalysis {
     }
 
     if (interactions.isEmpty) {
-    interactions.add('• No significant clashes or harmonies found between pillars');
+    interactions.add('• មិនឃើញមានឆុង រឺសុខដុមរុម្យនា ឆុងហេង អីគួរឲ្យកត់សម្គាល់នោះទេរវាងតួរាសីនីមួយៗ');
     }
 
     return interactions;
@@ -319,7 +319,7 @@ class BaziAnalysis {
 
     // Day Master analysis
     final dayMasterElement = _getElementFromStem(dayMaster);
-    takeaways.add('• Your Day Master is $dayMaster ($dayMasterElement) - ' +
+    takeaways.add('• តួរាសីថ្ងៃរបស់អ្នកគឺ $dayMaster ($dayMasterElement) - ' +
         _getDayMasterPersonality(dayMaster));
 
     // Element balance
@@ -343,10 +343,10 @@ class BaziAnalysis {
 
     // Career and wealth indicators
     if (elementsCount['Metal']! > 2 && dayMasterElement == 'Wood') {
-      takeaways.add('• Strong Metal controls Wood: Potential for career success but need to manage stress');
+      takeaways.add('• ធាតុមាសខ្លាំង អាចគ្រប់គ្រង ធាតុឈើបាន ៖ មានសក្តានុពលល្អណាស់សម្រាប់ភាពជោគជ័យក្នុងការងារ ប៉ុន្តែត្រូវចេះគ្រប់គ្រងអារម្មណ៍ស្ត្រេស និងសំពាធឲ្យបាន');
     }
     if (elementsCount['Water']! > 2 && dayMasterElement == 'Fire') {
-      takeaways.add('• Strong Water controls Fire: Need to protect your energy and resources');
+      takeaways.add('• ធាតុទឹកខ្លាំង អាចគ្រប់គ្រង ធាតុភ្លើងបាន ៖ ត្រូវចេះឃុំគ្រងការពារឋាមពល និងធនធានរបស់អ្នក កុំខ្ជះខ្ជាយ!');
     }
 
     return takeaways;
@@ -363,43 +363,43 @@ class BaziAnalysis {
     // General enhancements based on Day Master
     switch (dayMasterElement) {
       case 'Wood':
-        enhancements.add('• Use Water elements (blue/black colors, fountains) to nourish your Wood');
-        enhancements.add('• Add Wood elements (plants, green colors) for support');
+        enhancements.add('• ប្រើធាតុទឹក (ព័ណ ខៀវ រឺ ខ្មៅ និងប្រើទឹកធ្លាក់) ដើម្បីស្រោចស្រប់ចិញ្ចឹមធាតុឈើ');
+        enhancements.add('• បន្ថែមធាតុឈើ (ដាំដើមឈើ ដើមផ្ការ, ប្រើព័ណ៌បៃតង) ដើម្បីគាំទ្រគាំពារបន្ថែមទៀត');
         break;
       case 'Fire':
-        enhancements.add('• Use Wood elements (plants, green colors) to fuel your Fire');
-        enhancements.add('• Add red colors and triangular shapes for Fire energy');
+        enhancements.add('• ប្រើធាតុឈើ (ដាំដើមឈើ ដើមផ្ការ, ប្រើព័ណ៌បៃតង) ដើម្បីដុតបន្ថែមកំលាំងធាតុភ្លើង');
+        enhancements.add('• បន្ថែមព័ណ៌ក្រហម និង ប្រើរបស់របរដែលមានរាងជាត្រីកោណ ដើម្បីបន្ថែមកំលាំងធាតុភ្លើង');
         break;
       case 'Earth':
-        enhancements.add('• Use Fire elements (red colors, candles) to strengthen Earth');
-        enhancements.add('• Add earthy tones and square shapes for stability');
+        enhancements.add('• ប្រើធាតុភ្លើង (ព័ណ៌ក្រហម រឺលឿង, ប្រើទានក្រអូប) ដើម្បីបន្ថែមកំលាំងធាតុដី');
+        enhancements.add('• ប្រើព័ណ៌ណារាងដីៗ និងប្រើរបស់របរតុបតែងដែលមានរាងការ៉េ ដើម្បីឲ្យមានលំនឹង');
         break;
       case 'Metal':
-        enhancements.add('• Use Earth elements (crystals, earthy tones) to produce Metal');
-        enhancements.add('• Add white/metallic colors and round shapes for Metal energy');
+        enhancements.add('• ប្រើធាតុដី (ដាក់គ្រីស្តាល់ ថ្មកែវ ត្បូង, ប្រើព័ណ៌ដី) ដើម្បីបង្កើតកំលាំងធាតុដែក');
+        enhancements.add('• បន្ថែមព័ណ៌ ស រឺ ដែកស្រគាំៗ ហើយប្រើរបស់របរដែលមានរាងមូល រឺជារង្វង់ ដើម្បីលើកកំលាំងធាតុមាស');
         break;
       case 'Water':
-        enhancements.add('• Use Metal elements (white colors, metal objects) to produce Water');
-        enhancements.add('• Add black/blue colors and wavy shapes for Water energy');
+        enhancements.add('• ប្រើធាតុមាស (ប្រើព័ណ ស, គ្រឿងតុបតែងដែលធ្វើពីដែក រឺលោហៈ) ដើម្បីបង្កើតកំលាំងធាតុទឹក');
+        enhancements.add('• បន្ថែមព័ណ៌ ខ្មៅ រឺ ខៀវ ហើយប្រើរបស់របរដែលមានរូបរាងដូចជាទឹករលក ដើម្បីលើកកំលាំងធាតុទឹក');
         break;
     }
 
     // Enhancements for weakest element
     switch (weakestElement) {
       case 'Wood':
-        enhancements.add('• Boost Wood with plants in East sector of your home');
+        enhancements.add('• ជម្រុញធាតុឈើ ដោយប្រើកូនឈើ រឺរុក្ខជាតិ ដាក់នៅទិសខាងកើត នៃផ្ទះរបស់អ្នក');
         break;
       case 'Fire':
-        enhancements.add('• Enhance Fire with lights/candles in South sector');
+        enhancements.add('• ជម្រុញធាតុភ្លើង ដោយប្រើភ្លើងរឺទាន ដោយបំភ្លឺនៅទិសខាងត្បូង នៃផ្ទះរបស់អ្នក');
         break;
       case 'Earth':
-        enhancements.add('• Strengthen Earth with crystals/stones in Northeast/Southwest');
+        enhancements.add('• ពង្រឹងធាតុដី ដោយប្រើគ្រីស្តាល់ រឺត្បូង ដោយដាក់នៅទិសខាងជើងឈាងខាងកើត រឺត្បូងឈាងលិច នៃផ្ទះរបស់អ្នក');
         break;
       case 'Metal':
-        enhancements.add('• Increase Metal with white colors/metals in West/Northwest');
+        enhancements.add('• បន្ថែមធាតុដែក ដោយប្រើព័ណ៌ សរឺលោហៈ ដោយដាក់នៅទិសខាងលិច រឺជើងឈាងខាងលិច នៃផ្ទះរបស់អ្នក');
         break;
       case 'Water':
-        enhancements.add('• Support Water with fountains/aquariums in North sector');
+        enhancements.add('• បំប៉នធាតុទឹក ដោយប្រើទឹកហូរ រឺអាងចិញ្ចឹមត្រី នៅទិសខាងជើង នៃផ្ទះរបស់អ្នក');
         break;
     }
 
@@ -414,46 +414,46 @@ class BaziAnalysis {
     final hasChallenges = keyTakeaways.any((t) => t.contains('Risk') || t.contains('need'));
 
     if (hasChallenges) {
-      return 'Your Bazi chart shows strong potential but also some challenges to manage. '
-          'The $dayMasterElement energy gives you ${_getDayMasterStrength(dayMaster)}, '
-          'but you should pay attention to the areas mentioned in Key Takeaways.';
+      return 'ប៉ាជឺរបស់អ្នកបង្ហាញថា អ្នកមានសក្តានុពលខ្លាំងណាស់ ប៉ុន្តែមានបញ្ហាប្រឈមមួយចំនួនដែលត្រូវគ្រប់គ្រងឲ្យបាន។ '
+          'តួរាសីថ្ងៃ (Day Master) $dayMasterElement របស់អ្នក ផ្តល់នូវឋាមពលឲ្យអ្នកនូវកំលាំង ${_getDayMasterStrength(dayMaster)}, '
+          'ប៉ុន្តែអ្នកត្រូវយកចិត្តទុកដាក់ទៅលើកត្តាដែលគួរប្រយ័ត្នប្រយែងដែលបានរៀបរាប់ខាងលើ។';
     } else {
-      return 'Your Bazi chart indicates favorable energies overall! '
-          'As a $dayMaster ($dayMasterElement) person, you have ${_getDayMasterStrength(dayMaster)}. '
-          'Focus on maximizing your strengths shown in the analysis.';
+      return 'ប៉ាជឺរបស់អ្នកបង្ហាញថា ឋាមពលរបស់អ្នកសមប្រកបនឹងគ្នាជារួម មានសុខដុមរមនាល្អណាស់! '
+          'ក្នុងនាមជាអ្នកដែលមានតួរាសីថ្ងៃ (Day Master) ជា $dayMaster ($dayMasterElement) , អ្នកមានឋាមពល ${_getDayMasterStrength(dayMaster)} ។ '
+          'ដូចនេះត្រូវចេះពង្រីក និងធ្វើឲ្យប្រើសើរឡើងនូវកំលាំងដែលធាតុ និងវាសនាអ្នកនាំមក ដូចបានបង្ហាញនៅក្នុងការវិភាគខាងលើ។';
     }
   }
 
   static String _getDayMasterPersonality(String stem) {
     const personalities = {
-      '甲': 'strong leadership qualities like a mighty tree',
-      '乙': 'flexibility and adaptability like bending grass',
-      '丙': 'charismatic and energetic like the sun',
-      '丁': 'focused and precise like a candle flame',
-      '戊': 'stable and reliable like a mountain',
-      '己': 'nurturing and practical like farmland',
-      '庚': 'decisive and strong-willed like metal',
-      '辛': 'refined and detail-oriented like jewelry',
-      '壬': 'adaptable and resourceful like flowing water',
-      '癸': 'strategic and insightful like deep water',
+      '甲': 'គុណភាពជាអ្នកដឹកនាំដ៏មោះមុត រឹងមាំដូចដើមឈើដ៏ធំសម្បើម',
+      '乙': 'ពូកែបត់បែន និងងាយសម្របគ្រប់ស្ថានការណ៍ ដូចស្មៅដែរទន់រេមិនងាយបាក់',
+      '丙': 'មានមន្តស្នេហ៍ គេរស់មិនអាចខ្វះបាន និងស្វាហាប់ដូចព្រះអាទិត្យ',
+      '丁': 'ពូកែសម្រួចទិសដៅ ផ្តោតអ្វីច្បាស់រឿងនោះ ដូចភ្លើងទៀនដែលចេះនឹងធឹងល្អ',
+      '戊': 'មានលំនឹង ហើយទុកចិត្តបាន មហិមាដូចជាភ្នំដ៏រឹងមាំ',
+      '己': 'ជាមនុស្សគេមាននិស្ស័យ ដូចដីមានជីជាតិ ជាមនុសបានការមានប្រយោជន៍ដូចដីកសិដ្ឋាន',
+      '庚': 'ពូកែសម្រេចចិត្ត ម៉ាត់ប្រៃ ហើយមោះមុត ដូចដាវដ៏មុតស្រួច',
+      '辛': 'ជាពេជ្រដែលច្នៃដ័ប្រណីត សម្រិតសម្រាំង ហើយគិតពិចារណាល្អិតល្អន់',
+      '壬': 'ងាយចូលចំណោមគេ ហើយប្រកបដោយធនធានដែលអាស្រ័យបាន ដូចទឹកដែលហូរ',
+      '癸': 'មនុស្សមានយុទ្ធសាស្ត្រក្នុងខ្លួន មើលវែងឆ្ងាយ សុីជ្រៅ ត្រជាក់មិនងាយមើលដឹង ដូចទឹកបាតទន្លេ និងសមុទ្រ',
     };
     return personalities[stem] ?? 'unique characteristics';
   }
 
   static String _getDayMasterStrength(String stem) {
     const strengths = {
-      '甲': 'natural leadership and growth potential',
-      '乙': 'diplomatic skills and adaptability',
-      '丙': 'charisma and ability to inspire others',
-      '丁': 'precision and attention to detail',
-      '戊': 'stability and practical problem-solving',
-      '己': 'nurturing abilities and service orientation',
-      '庚': 'strong will and ability to cut through obstacles',
-      '辛': 'refined taste and analytical skills',
-      '壬': 'adaptability and broad perspective',
-      '癸': 'strategic thinking and intuition',
+      '甲': 'កើមមកជាអ្នកដឹកនាំពីធម្មជាតិ ធំធាត់ប្រកបដោយសក្តានុពល',
+      '乙': 'ប្រកបដោយជំនាញការទូត ពូកែសម្របសម្រួល និងដោះស្រាយបញ្ហារដោយសន្តិវិធី',
+      '丙': 'មានមន្តស្នេហ៍ និងមានសមត្ថភាពក្នុងការលើកទឹកចិត្តអ្នកដទៃ',
+      '丁': 'មានភាពជាក់លាក់ ម៉ាត់ប្រៃ និងចេះយកចិត្តទុកដាក់ល្អិតល្អន់គ្រប់ប្រភេទការងារ',
+      '戊': 'មានលំនឹង នឹងធឹង ហើយប្រកបដោយភាពប្រាកដនិយម និងពូកែដោះស្រាយបញ្ហា',
+      '己': 'ពូកែចិញ្ចឹមបីបាច់ថែរក្សា និងចេះតំរង់ទិសការងាររកសុី',
+      '庚': 'មានឆន្ទៈដ៏រឹងមាំ និងសមត្ថភាពក្នុងការដោះស្រាយឆ្លងកាត់ឧបសគ្គនានា',
+      '辛': 'ជំនាញក្នុងការវិភាគគឺពូកែណាស់ ហើយជាមនុស្សប្រកបដោយរសនិយមប្លែកគេ',
+      '壬': 'ងាយបន្សាំនិងស្ថានភាពថ្មី ហើយមានគោលគំនិតទូលំទូលាយ',
+      '癸': 'ជាមនុសដែលមានការគិតបែបយុទ្ធសាស្ត្រ និងប្រកបដោយវិចារណញាណ',
     };
-    return strengths[stem] ?? 'unique strengths';
+    return strengths[stem] ?? 'ជំនាញពិសេសប្លែកគេ';
   }
 
   static String _getStrongestElement(Map<String, int> elementsCount) {

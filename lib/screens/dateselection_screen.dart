@@ -119,7 +119,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
   }
 
   Widget _buildWeekdayHeaders() {
-    const List<String> weekdays = ['ទ', 'ច', 'អ', 'ព', 'ព្រ', 'ស', 'ស'];
+    const List<String> weekdays = ['ទ', 'ច', 'អ', 'ព', 'ព្រ', 'សុ', 'ស'];
 
     return Row(
       children:

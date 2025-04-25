@@ -1,158 +1,288 @@
-import 'dart:ui'; // For ImageFilter
-
+import 'dart:ui';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:sensors_plus/sensors_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+import 'dart:async'; // For Timer
 
 class PrayScreen extends StatefulWidget {
   const PrayScreen({super.key});
 
   @override
-  createState() => _PrayScreenState(); // Dart automatically infers State<PrayScreen>
+  createState() => _PrayScreenState();
 }
 
-class _PrayScreenState extends State<PrayScreen>
-    with SingleTickerProviderStateMixin {
+class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
+  bool _showList = true;
+
+  // Video player variables
   late VideoPlayerController _controller;
   bool _isLoading = true;
-  bool _isAnimationCompleted = false;
-  bool _isBuffering = false; // Track buffering state
-  late AnimationController _animationController;
+  bool _isVideoAnimationCompleted = false;
+  bool _isBuffering = false;
+  late AnimationController _videoAnimationController;
 
-  // Variables for playlist functionality
+  // Playlist variables
   bool _isPlaylistExpanded = false;
   int? _selectedIndex;
   final List<String> _playlistItems = [
-    "បន់ស្រន់",
-    "សូត្រគាថា",
+    "ក្រឡុកស៊ីមស៊ី",
+    "ផ្សងក្រឡាប់",
     "ព្យាបាលចិត្ត",
     "ដេញចង្រៃ",
     "ដាស់ហេង",
   ];
-
-  // List of video URLs corresponding to playlist items
   final List<String> _videoUrls = [
-    'assets/videos/pray.mp4', // Default video (index 0)
+    'assets/videos/pray.mp4',
     'https://masterelf.vip/wp-content/uploads/app/pray1.mp4',
     'https://masterelf.vip/wp-content/uploads/app/pray2.mp4',
     'https://masterelf.vip/wp-content/uploads/app/pray3.mp4',
     'https://masterelf.vip/wp-content/uploads/app/pray4.mp4',
   ];
 
+  // Kau Cim game variables
+  late AnimationController _gameAnimationController;
+  bool _isGameAnimating = false;
+  bool _showGameResult = false;
+  int _resultNumber = 0;
+  int _playsToday = 0;
+  List<double> _accelerometerValues = [0, 0, 0];
+  List<double> _previousAccelerometerValues = [0, 0, 0];
+  bool _showGame = false;
+
+  // Shake timing variables
+  bool _isShaking = false;
+  Duration _shakeDuration = Duration.zero;
+  Timer? _shakeTimer;
+
   @override
   void initState() {
     super.initState();
-    _initializeDefaultVideo(); // Initialize default video
-    _animationController = AnimationController(
+    _videoAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
     );
+    _gameAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _initializeDefaultVideo();
+    _loadPlayData();
+    _startAccelerometer();
   }
 
-  // Initialize default video from assets
+  void _handleShake() {
+    if (!_isGameAnimating) return;
+
+    // Start shake timer if this is the first shake
+    if (!_isShaking) {
+      setState(() {
+        _isShaking = true;
+        _shakeDuration = Duration.zero;
+      });
+      _gameAnimationController.repeat();
+
+      // Start a timer to track shake duration
+      _shakeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_isShaking) {
+          setState(() {
+            _shakeDuration += const Duration(seconds: 1);
+          });
+
+          // Check if 5 seconds have passed
+          if (_shakeDuration.inSeconds >= 5) {
+            _finishGameAnimation();
+            timer.cancel();
+          }
+        } else {
+          timer.cancel();
+        }
+      });
+    }
+  }
+
+  void _startGame() {
+    if (_playsToday >= 30) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '១ថ្ងៃ យើងផ្សងបានតែ ៣ដង ទេ!\nវេលាស្អែកទើបអាចក្រឡុកផ្សងម្តងទៀតបាន',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Siemreap',
+              fontSize: 14.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          backgroundColor: Colors.redAccent.withValues(alpha:0.8),
+          width: 300,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '✨ ក្រឡុកទូរស័ព្ទ ដើម្បីក្រឡុកកំប៉ុងចង្កឹះ ✨',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Siemreap',
+            fontSize: 14.0,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            letterSpacing: 0.5,
+          ),
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        backgroundColor: Colors.transparent,
+        width: 300,
+      ),
+    );
+
+    setState(() {
+      _isPlaylistExpanded = false;
+      _showGame = true;
+      _isGameAnimating = true;
+      _showGameResult = false;
+      _isShaking = false;
+      _gameAnimationController.stop();
+      _showList = false;
+    });
+  }
+
+  void _startAccelerometer() {
+    accelerometerEventStream().listen((AccelerometerEvent event) {
+      final newValues = [event.x, event.y, event.z];
+
+      if ((newValues[0] - _accelerometerValues[0]).abs() > 0.1 ||
+          (newValues[1] - _accelerometerValues[1]).abs() > 0.1 ||
+          (newValues[2] - _accelerometerValues[2]).abs() > 0.1) {
+        setState(() {
+          _previousAccelerometerValues = _accelerometerValues;
+          _accelerometerValues = newValues;
+        });
+
+        if (_isGameAnimating) {
+          _detectShake();
+        } else if (_isShaking) {
+          setState(() {
+            _isShaking = false;
+          });
+          _gameAnimationController.stop();
+        }
+      }
+    });
+  }
+
+  void _finishGameAnimation() {
+    _shakeTimer?.cancel();
+    setState(() {
+      _isGameAnimating = false;
+      _isShaking = false;
+      _gameAnimationController.stop();
+      _resultNumber = 1 + (DateTime.now().millisecond % 100);
+      _showGameResult = true;
+      _playsToday++;
+      _savePlayData();
+    });
+  }
+
   void _initializeDefaultVideo() async {
     setState(() {
       _isLoading = true;
-      _isAnimationCompleted = false;
+      _isVideoAnimationCompleted = false;
     });
 
     _controller = VideoPlayerController.asset(_videoUrls[0])
-      ..initialize()
-          .then((_) {
-            setState(() {
-              _isLoading = false;
-            });
-            _controller.play();
-            _controller.setLooping(true); // Loop the default video
-          })
-          .catchError((error) {
-            setState(() {
-              _isLoading = false;
-            });
-            //print("Error loading default video: $error");
-          });
+      ..initialize().then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+        _controller.play();
+        _controller.setLooping(true);
+      }).catchError((error) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
 
-    // Listen for video completion
     _controller.addListener(_onVideoCompletion);
-
-    // Listen for buffering updates
     _controller.addListener(_onBufferingUpdate);
   }
 
-  // Handle video completion
   void _onVideoCompletion() {
     if (_controller.value.position >= _controller.value.duration &&
         !_controller.value.isLooping) {
-      // If the video is not looping and has finished, switch back to the default video
       _replaceVideo(_videoUrls[0]);
     }
   }
 
-  // Handle buffering updates
   void _onBufferingUpdate() {
     if (_controller.value.isBuffering && !_isBuffering) {
       setState(() {
-        _isBuffering = true; // Show Lottie animation when buffering
+        _isBuffering = true;
       });
-      _playLottieAnimation(); // Play the Lottie animation when buffering starts
+      _playLottieAnimation();
     } else if (!_controller.value.isBuffering && _isBuffering) {
       setState(() {
-        _isBuffering =
-            false; // Hide Lottie animation when buffering is complete
+        _isBuffering = false;
       });
     }
   }
 
-  // Play the Lottie animation
   void _playLottieAnimation() {
-    _animationController.reset(); // Reset the animation
-    _animationController.forward(); // Play the animation
+    _videoAnimationController.reset();
+    _videoAnimationController.forward();
   }
 
-  // Replace video with a new one (either asset or network)
+  void _onVideoAnimationCompleted() {
+    setState(() {
+      _isVideoAnimationCompleted = true;
+    });
+  }
+
   void _replaceVideo(String videoSource) async {
     setState(() {
       _isLoading = true;
-      _isAnimationCompleted = false; // Reset animation completion state
+      _isVideoAnimationCompleted = false;
     });
 
-    await _controller.dispose(); // Dispose the previous controller
+    await _controller.dispose();
 
     if (videoSource.startsWith('http')) {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(videoSource),
-      ); // Load network video
+      _controller = VideoPlayerController.networkUrl(Uri.parse(videoSource));
     } else {
-      _controller = VideoPlayerController.asset(
-        videoSource,
-      ); // Load asset video
+      _controller = VideoPlayerController.asset(videoSource);
     }
 
-    _controller
-        .initialize()
-        .then((_) {
-          setState(() {
-            _isLoading = false;
-          });
-          _controller.play();
-          _controller.setLooping(
-            videoSource == _videoUrls[0],
-          ); // Loop only the default video
-        })
-        .catchError((error) {
-          setState(() {
-            _isLoading = false;
-          });
-          //print("Error loading video: $error");
-        });
+    _controller.initialize().then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+      _controller.play();
+      _controller.setLooping(videoSource == _videoUrls[0]);
+    }).catchError((error) {
+      setState(() {
+        _isLoading = false;
+      });
+    });
 
-    // Listen for video completion
     _controller.addListener(_onVideoCompletion);
-
-    // Listen for buffering updates
     _controller.addListener(_onBufferingUpdate);
-
-    // Play the Lottie animation once when loading a new video
     _playLottieAnimation();
   }
 
@@ -161,14 +291,160 @@ class _PrayScreenState extends State<PrayScreen>
     _controller.removeListener(_onVideoCompletion);
     _controller.removeListener(_onBufferingUpdate);
     _controller.dispose();
-    _animationController.dispose();
+    _videoAnimationController.dispose();
+    _gameAnimationController.dispose();
+    _shakeTimer?.cancel();
     super.dispose();
   }
 
-  void _onAnimationCompleted() {
+  Future<void> _loadPlayData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastDateStr = prefs.getString('lastPlayDate');
+    final today = DateTime.now();
+
+    if (lastDateStr != null) {
+      final lastDate = DateTime.parse(lastDateStr);
+      if (DateFormat('yyyy-MM-dd').format(lastDate) == DateFormat('yyyy-MM-dd').format(today)) {
+        setState(() {
+          _playsToday = prefs.getInt('playsToday') ?? 0;
+        });
+      }
+    }
+  }
+
+  Future<void> _savePlayData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    await prefs.setString('lastPlayDate', today.toString());
+    await prefs.setInt('playsToday', _playsToday);
+  }
+
+  void _detectShake() {
+    double deltaX = (_accelerometerValues[0] - _previousAccelerometerValues[0]).abs();
+    double deltaY = (_accelerometerValues[1] - _previousAccelerometerValues[1]).abs();
+    double deltaZ = (_accelerometerValues[2] - _previousAccelerometerValues[2]).abs();
+
+    const shakeThreshold = 2.5;
+    if (deltaX > shakeThreshold || deltaY > shakeThreshold || deltaZ > shakeThreshold) {
+      _handleShake();
+    }
+  }
+
+  void _closeGame() {
     setState(() {
-      _isAnimationCompleted = true;
+      _showGame = false;
+      _showGameResult = false;
+      _isGameAnimating = false;
+      _showList = true; // Show the list again when game closes
     });
+  }
+
+  void _showFortuneDialog() {
+    String fortuneType = _resultNumber <= 33
+        ? "Inauspicious"
+        : _resultNumber <= 66 ? "Neutral" : "Auspicious";
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha:0.5),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Stack(
+          children: [
+            // Blurred background container
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha:0.3),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha:0.3),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha:0.2),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 60), // Increased space for logo
+                      Text(
+                        "លទ្ធផលចង្កឹះ លេខ #$_resultNumber - $fortuneType",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'Dangrek',
+                        ),
+                        textAlign: TextAlign.center, // Centered the heading
+                      ),
+                      const SizedBox(height: 15),
+                      Text(
+                        "This is where the detailed interpretation for fortune stick #$_resultNumber would appear.",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withValues(alpha:0.9),
+                          fontFamily: 'Siemreap',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.withValues(alpha:0.5),
+                              foregroundColor: Colors.white,
+                              textStyle: const TextStyle(fontFamily: 'Dangrek'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(
+                                  color: Colors.white.withValues(alpha:0.3),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: const Text("យល់ព្រម"),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Logo positioned at top (half inside dialog)
+            Positioned(
+              top: -40, // Adjusted to make logo half outside
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -176,13 +452,11 @@ class _PrayScreenState extends State<PrayScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset('assets/images/ybg.jpg', fit: BoxFit.cover),
           ),
 
-          // Video Player (only shown after Lottie animation completes and not buffering)
-          if (!_isLoading && _isAnimationCompleted && !_isBuffering)
+          if (!_isLoading && _isVideoAnimationCompleted && !_isBuffering)
             SizedBox.expand(
               child: FittedBox(
                 fit: BoxFit.cover,
@@ -194,42 +468,121 @@ class _PrayScreenState extends State<PrayScreen>
               ),
             ),
 
-          // Lottie Animation (shown while loading, buffering, or until animation completes)
-          if (_isLoading || _isBuffering || !_isAnimationCompleted)
+          if (_isLoading || _isBuffering || !_isVideoAnimationCompleted)
             Center(
               child: Lottie.asset(
                 'assets/jsons/loading_animation.json',
-                controller: _animationController,
+                controller: _videoAnimationController,
                 onLoaded: (composition) {
-                  _animationController
+                  _videoAnimationController
                     ..duration = composition.duration
-                    ..forward().whenComplete(() => _onAnimationCompleted());
+                    ..forward().whenComplete(_onVideoAnimationCompleted);
                 },
               ),
             ),
 
-          // Floating Playlist with Glass Morphism
+          if (_showGame) ...[
+            Container(color: Colors.black54),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                  if (!_showGameResult)
+                    GestureDetector(
+                      onTap: _startGame,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Lottie.asset(
+                            'assets/jsons/lightray.json',
+                            controller: _gameAnimationController,
+                            width: 350,
+                            height: 350,
+                            fit: BoxFit.contain,
+                            animate: _isShaking,
+                          ),
+                          Image.asset(
+                            'assets/images/kaucim.png',
+                            width: 300,
+                            height: 300,
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (_showGameResult)
+                    GestureDetector(
+                      onTap: _showFortuneDialog,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/kaucim_stick.png',
+                            width: 350,
+                            height: 350,
+                          ),
+                          Text(
+                            '$_resultNumber',
+                            style: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white, // Changed to white
+                              fontFamily: 'Dangrek', // Added Dangrek font
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 0),
+                  if (!_isGameAnimating && !_showGameResult)
+                    ElevatedButton(
+                      onPressed: _startGame,
+                      child: const Text('ក្រឡុកផ្សងស៊ីមស៊ី'),
+                    ),
+                  const SizedBox(height: 00),
+                  const SizedBox(height: 00),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                      child: ElevatedButton(
+                        onPressed: _closeGame,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.withValues(alpha:0.5),
+                          foregroundColor: Colors.white,
+                          textStyle: const TextStyle(fontFamily: 'Dangrek'),
+                        ),
+                        child: const Text('ឈប់ក្រឡុក'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           Positioned(
             right: 16.0,
             bottom: 80.0,
-            child: ClipRRect(
+            child: (_isLoading || _isBuffering || !_isVideoAnimationCompleted || !_showList)
+                ? Container()
+                : ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                 child: Container(
                   width: 120.0,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: Colors.white.withValues(alpha:0.3),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: Colors.white.withValues(alpha:0.2),
                       width: 1.0,
                     ),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Header
                       GestureDetector(
                         onTap: () {
                           setState(() {
@@ -237,8 +590,8 @@ class _PrayScreenState extends State<PrayScreen>
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text(
+                          padding: const EdgeInsets.all(8.0),
+                          child: const Text(
                             'រៀបពិធី',
                             style: TextStyle(
                               fontFamily: 'Dangrek',
@@ -251,36 +604,38 @@ class _PrayScreenState extends State<PrayScreen>
                         ),
                       ),
 
-                      // Playlist Items (only visible when expanded)
                       if (_isPlaylistExpanded)
                         ..._playlistItems.asMap().entries.map((entry) {
                           int index = entry.key;
                           String item = entry.value;
                           return GestureDetector(
                             onTap: () {
-                              setState(() {
-                                _selectedIndex = index;
-                              });
-
-                              // Replace the video based on the selected index
-                              _replaceVideo(_videoUrls[index]);
+                              if (index == 0) {
+                                _startGame();
+                              } else {
+                                setState(() {
+                                  _selectedIndex = index;
+                                  _showGame = false;
+                                  _isPlaylistExpanded = false;
+                                });
+                                _replaceVideo(_videoUrls[index]);
+                              }
                             },
                             child: Container(
                               width: double.infinity,
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 vertical: 8.0,
                                 horizontal: 12.0,
                               ),
                               decoration: BoxDecoration(
-                                color:
-                                    _selectedIndex == index
-                                        ? Colors.yellow.withValues(alpha: 0.3)
-                                        : Colors.transparent,
+                                color: _selectedIndex == index
+                                    ? Colors.yellow.withValues(alpha:0.3)
+                                    : Colors.transparent,
                                 borderRadius: BorderRadius.circular(4.0),
                               ),
                               child: Text(
                                 item,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontFamily: 'Dangrek',
                                   color: Colors.white,
                                   fontSize: 14.0,

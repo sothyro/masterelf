@@ -799,7 +799,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                           child: Column(
                             children: [
                               Text(
-                                'Bazi Analysis',
+                                'អានលទ្ធផលប៉ាជឺ',
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -818,7 +818,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Day Master: ${analysis['dayMaster']} (${analysis['dayMasterElement']})',
+                                'តួរាសីថ្ងៃ DM: ${analysis['dayMaster']} (${analysis['dayMasterElement']})',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -832,19 +832,19 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                         Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         // Year Pillar Analysis
-                        _buildPillarSection(analysis['yearAnalysis'], 'Year Pillar'),
+                        _buildPillarSection(analysis['yearAnalysis'], 'តួរាសីឆ្នាំ'),
                         Divider(color: Colors.white.withValues(alpha: 0.3)),
 
                         // Month Pillar Analysis
-                        _buildPillarSection(analysis['monthAnalysis'], 'Month Pillar'),
+                        _buildPillarSection(analysis['monthAnalysis'], 'តួរាសីខែ'),
                         Divider(color: Colors.white.withValues(alpha: 0.3)),
 
                         // Day Pillar Analysis
-                        _buildPillarSection(analysis['dayAnalysis'], 'Day Pillar'),
+                        _buildPillarSection(analysis['dayAnalysis'], 'តួរាសីថ្ងៃ'),
                         Divider(color: Colors.white.withValues(alpha: 0.3)),
 
                         // Hour Pillar Analysis
-                        _buildPillarSection(analysis['hourAnalysis'], 'Hour Pillar'),
+                        _buildPillarSection(analysis['hourAnalysis'], 'តួរាសីម៉ោង'),
                         Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         Padding(
@@ -853,7 +853,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Key Interactions',
+                                'អន្តរកម្មនៃធាតុ និងឆ្នាំ',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -885,7 +885,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Key Takeaways & Predictions',
+                                'គន្លឹះគួរចងចាំ',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -917,7 +917,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Feng Shui Enhancement',
+                                'បើក រឺ កែ ហុងស៊ុយ',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -949,7 +949,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Final Verdict',
+                                'សាលក្រមប៉ាជឺ',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -999,7 +999,7 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
                   textStyle: const TextStyle(fontFamily: 'Dangrek'),
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: const Text('យល់ព្រម'),
               ),
             ),
           ],

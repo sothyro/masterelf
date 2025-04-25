@@ -138,7 +138,7 @@ class _LopanScreenState extends State<LopanScreen> {
 
           // Blur overlay
           BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
             child: Container(color: Colors.black.withValues(alpha:0.3)),
           ),
 
@@ -203,7 +203,7 @@ class _LopanScreenState extends State<LopanScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 0),
                         // Degree and mountain display
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -369,7 +369,7 @@ class _LopanScreenState extends State<LopanScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(

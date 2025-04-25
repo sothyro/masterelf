@@ -256,7 +256,7 @@ class _TalismanScreenState extends State<TalismanScreen>
             ),
           ),
           child: const Text(
-            'ស្តេចយ័ន្តហេង ការពារ ទេវតាស័ក្តសិទ្ធិ',
+            'ស្តេចយ័ន្ត ទេវតាស័ក្តសិទ្ធិ',
             style: TextStyle(
               fontFamily: 'Dangrek',
               fontSize: 20,
