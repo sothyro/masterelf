@@ -94,10 +94,16 @@ flutter:
      - assets/icons/more.png
      - assets/icons/pray.png
      - assets/icons/talisman.png
+     - assets/icons/menu.png
      - assets/images/logo.png
      - assets/images/kaucim.png
      - assets/images/kaucim_stick.png
      - assets/images/intepretation.png
+     - assets/images/yin.png
+     - assets/images/yang.png
+     - assets/images/standing.png
+     - assets/images/moon_blocks.png
+     - assets/images/profileicon.png
      - assets/images/star1.png
      - assets/images/star2.png
      - assets/images/star3.png

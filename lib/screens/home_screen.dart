@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
-import 'about_screen.dart'; // Add this import
+import 'about_screen.dart';
 import 'web_screen.dart';
 import 'bazi_page.dart';
 import 'dateselection_screen.dart';
@@ -21,8 +21,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedIndex = 2;
   late AnimationController _animationController;
   late Animation<double> _animation;
-  OverlayEntry? _overlayEntry;
-  String? _currentOpenMenu; // Track which menu is currently open
+  late AnimationController _menuTextAnimationController;
+  late Animation<Offset> _menuTextAnimation;
+  late AnimationController _lottieAnimationController;
+  bool _isMenuOpen = false;
 
   final List<Widget> _pages = [
     PrayScreen(),
@@ -33,28 +35,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     AboutScreen(),
   ];
 
-  final Map<String, List<String>> _dropdownItems = {
-    '🔥ហុងស៊ុយយុគ9': ['វីដេអូ ·Vlogs', 'សៀវភៅយុគ9','អ៊ីជីង·易經9'],
-    '🧧លាភហេងឆ្នាំថ្មី': ['រាសីឆ្នាំទាំង12','ដេគ័រកាត់ឆុង','ហាងហុងស៊ុយ'],//['តារាសាស្ត្រ·飞星', 'ទ្វារវាសនា·奇门', 'អ៊ីជីង·易經'],
-    '☯️ម៉ាស្ទ័រអេល': ['កម្មវិធីថ្មីៗ','ទំនាក់ទំនង','ណាត់ពិភាក្សា'],
-  };
-
-  final Map<String, String> _itemUrls = {
-    'វីដេអូ ·Vlogs': 'https://period9.masterelf.vip/vlogs',
-    'សៀវភៅយុគ9': 'https://period9.masterelf.vip/period9',
-    'អ៊ីជីង·易經9': 'https://period9.masterelf.vip/iching9',
-    'រាសីឆ្នាំទាំង12': 'https://period9.masterelf.vip/zodiac',
-    'ដេគ័រកាត់ឆុង': 'https://period9.masterelf.vip/fengshuicure',
-    'ហាងហុងស៊ុយ': 'https://period9.masterelf.vip/store',
-    'កម្មវិធីថ្មីៗ': 'https://period9.masterelf.vip/event',
-    'ណាត់ពិភាក្សា': 'https://period9.masterelf.vip/appointment',
-    //'អំពីកម្មវិធីយុគ9': 'https://masterelf.vip/contact/',
-  };
-
-  final Map<String, GlobalKey> _buttonKeys = {
-    '🔥ហុងស៊ុយយុគ9': GlobalKey(),
-    '🧧លាភហេងឆ្នាំថ្មី': GlobalKey(),
-    '☯️ម៉ាស្ទ័រអេល': GlobalKey(),
+  // Simplified menu structure
+  final Map<String, List<Map<String, String>>> _menuItems = {
+    '🔥ហុងស៊ុយថ្មីយុគ9': [
+      {'title': '     💠 វីដេអូ ·Vlogs', 'url': 'https://period9.masterelf.vip/vlogs'},
+      {'title': '     💠 សៀវភៅយុគ9', 'url': 'https://period9.masterelf.vip/period9'},
+    ],
+    '🧧លាភហេងឆ្នាំថ្មី': [
+      {'title': '     💠 រាសីឆ្នាំទាំង12', 'url': 'https://period9.masterelf.vip/zodiac'},
+      {'title': '     💠 ដេគ័រកាត់ឆុង', 'url': 'https://period9.masterelf.vip/fengshuicure'},
+    ],
+    '☯️ម៉ាស្ទ័រអេល': [
+      {'title': '     💠 EVENTSថ្មី', 'url': 'https://period9.masterelf.vip/event'},
+      {'title': '     💠 ទំនាក់ទំនង', 'url': 'about'},
+      {'title': '     💠 ណាត់ពិភាក្សា', 'url': 'https://period9.masterelf.vip/appointment'},
+    ],
   };
 
   void _onItemTapped(int index) {
@@ -68,11 +63,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
     _animation = Tween<double>(begin: 1.0, end: 1.2).animate(_animationController);
+
+    _menuTextAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+
+    _menuTextAnimation = Tween<Offset>(
+      begin: const Offset(0, 0),
+      end: const Offset(-0.1, 0),
+    ).animate(CurvedAnimation(
+      parent: _menuTextAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
+    _lottieAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.repeat(reverse: true);
@@ -82,111 +96,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
-    _removeOverlay();
+    _menuTextAnimationController.dispose();
+    _lottieAnimationController.dispose();
     super.dispose();
   }
 
-  void _removeOverlay() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    _currentOpenMenu = null;
+  void _toggleMenu() {
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+    });
   }
 
-  void _showMenuOverlay(BuildContext context, String text) {
-    // If clicking the same button that's already open, close it
-    if (_currentOpenMenu == text) {
-      _removeOverlay();
-      return;
+  void _closeMenu() {
+    setState(() {
+      _isMenuOpen = false;
+    });
+  }
+
+  void _navigateTo(String url) {
+    _closeMenu();
+    if (url == 'about') {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => AboutScreen()));
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => WebScreen(url: url)));
     }
-
-    // Otherwise, remove any existing overlay and show the new one
-    _removeOverlay();
-    _currentOpenMenu = text;
-
-    final buttonKey = _buttonKeys[text]!;
-    final renderBox = buttonKey.currentContext?.findRenderObject() as RenderBox;
-    final buttonSize = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
-
-    _overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        left: offset.dx,
-        top: offset.dy + buttonSize.height + 5,
-        child: Material(
-          color: Colors.transparent,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: BackdropFilter(
-              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                width: buttonSize.width,
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _dropdownItems[text]!.map((item) {
-                    return InkWell(
-                      onTap: () {
-                        _removeOverlay();
-                        // Special case for 'ទំនាក់ទំនង'
-                        if (item == 'ទំនាក់ទំនង') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AboutScreen(),
-                            ),
-                          );
-                        }
-                        // For all other items that have URLs
-                        else if (_itemUrls.containsKey(item)) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => WebScreen(url: _itemUrls[item]!),
-                            ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: _dropdownItems[text]!.last == item
-                                ? BorderSide.none
-                                : BorderSide(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                width: 1),
-                          ),
-                        ),
-                        child: Text(
-                          item,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontFamily: 'Dangrek',
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    Overlay.of(context).insert(_overlayEntry!);
   }
 
   @override
   Widget build(BuildContext context) {
+    final bottomNavBarHeight = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -195,62 +134,210 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.only(top: 50),
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildMenuButton('🔥ហុងស៊ុយយុគ9'),
-                  const SizedBox(width: 10),
-                  _buildMenuButton('🧧លាភហេងឆ្នាំថ្មី'),
-                  const SizedBox(width: 10),
-                  _buildMenuButton('☯️ម៉ាស្ទ័រអេល'),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: GestureDetector(
+                      onTap: _toggleMenu,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          SizedBox(
+                            width: 60,
+                            height: 60,
+                            child: Lottie.asset(
+                              'assets/jsons/lightray.json',
+                              controller: _lottieAnimationController,
+                              animate: true,
+                              repeat: true,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Image.asset(
+                              'assets/icons/menu.png',
+                              width: 50,
+                              height: 50,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SlideTransition(
+                    position: _menuTextAnimation,
+                    child: Text(
+                      'MENU',
+                      style: TextStyle(
+                        fontFamily: 'Dangrek',
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
+          if (_isMenuOpen) ...[
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _closeMenu,
+                behavior: HitTestBehavior.opaque,
+              ),
+            ),
+            _buildSlideMenu(context, bottomNavBarHeight),
+          ],
         ],
       ),
       extendBody: true,
-      bottomNavigationBar: ClipRRect(
-        child: BackdropFilter(
-          filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha:0.5),
-                  spreadRadius: 5,
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildSlideMenu(BuildContext context, double bottomNavBarHeight) {
+    final safeAreaTop = MediaQuery.of(context).padding.top;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final menuHeight = screenHeight - safeAreaTop - bottomNavBarHeight;
+
+    return Positioned(
+      left: 0,
+      top: safeAreaTop,
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.7,
+        height: menuHeight,
+        child: Material(
+          color: Colors.transparent,
+          child: ClipRRect(
+            child: BackdropFilter(
+              filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
-              ],
-            ),
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white.withValues(alpha:0.4),
-              currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
-              items: [
-                _buildBottomNavItem('assets/icons/pray.png', 'ពិធី', 0),
-                _buildBottomNavItem('assets/icons/bazi.png', 'បាជឺ', 1),
-                _buildBottomNavItem('assets/icons/date.png', 'វេលា', 2),
-                _buildBottomNavItem('assets/icons/lopan.png', 'ឡកែ', 3),
-                _buildBottomNavItem('assets/icons/talisman.png', 'យ័ន្ត', 4),
-              ],
-              selectedItemColor: _getSelectedItemColor(_selectedIndex),
-              unselectedItemColor: Colors.black,
-              unselectedLabelStyle: const TextStyle(
-                fontFamily: 'Dangrek',
-                color: Colors.black,
-                fontSize: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: Icon(Icons.close, color: Colors.white),
+                        onPressed: _closeMenu,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                        right: 20,
+                        bottom: 20,
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundImage: AssetImage('assets/images/profileicon.png'),
+                          ),
+                          const SizedBox(width: 15),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'ម៉ាស្ទ័រអេល',
+                                style: TextStyle(
+                                  fontFamily: 'Dangrek',
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'កម្មវិធីយុគ9 (V1.8)',
+                                style: TextStyle(
+                                  fontFamily: 'Dangrek',
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: _menuItems.entries.map((entry) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                child: Text(
+                                  entry.key,
+                                  style: TextStyle(
+                                    fontFamily: 'Dangrek',
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              ...entry.value.map((item) {
+                                return ListTile(
+                                  title: Text(
+                                    item['title']!,
+                                    style: TextStyle(
+                                      fontFamily: 'Dangrek',
+                                      color: Colors.white.withValues(alpha: 0.8),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  onTap: () => _navigateTo(item['url']!),
+                                );
+                              }),
+                              const Divider(
+                                color: Colors.white24,
+                                height: 20,
+                                thickness: 1,
+                                indent: 16,
+                                endIndent: 16,
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        'Developed by: \nStonechat Communications\n\nក្រុមហ៊ុនហុងស៊ុយ ម៉ាស្ទ័អេល\nMaster Elf Feng Shui 风水 ™️\n©️2026 - All rights reserved.',
+                        style: TextStyle(
+                          fontFamily: 'Dangrek',
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              selectedLabelStyle: TextStyle(
-                fontFamily: 'Dangrek',
-                color: _getSelectedItemColor(_selectedIndex),
-                fontSize: 16,
-              ),
-              selectedFontSize: 16,
-              unselectedFontSize: 16,
             ),
           ),
         ),
@@ -258,39 +345,68 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildBackground() {
-    return Container(
-        decoration: const BoxDecoration(
-        image: DecorationImage(
-        image: AssetImage('assets/images/bg.jpg'),
-    fit: BoxFit.cover,
-    ),
-    ),
-    child: BackdropFilter(
-    filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-    child: Container(color: Colors.black.withValues(alpha:0.4)),
-    ));
+  Widget _buildBottomNavigationBar() {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.5),
+                spreadRadius: 5,
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white.withValues(alpha: 0.4),
+            currentIndex: _selectedIndex,
+            onTap: (index) {
+              _closeMenu(); // Close menu when bottom nav item is tapped
+              _onItemTapped(index);
+            },
+            items: [
+              _buildBottomNavItem('assets/icons/pray.png', 'ពិធី', 0),
+              _buildBottomNavItem('assets/icons/bazi.png', 'បាជឺ', 1),
+              _buildBottomNavItem('assets/icons/date.png', 'វេលា', 2),
+              _buildBottomNavItem('assets/icons/lopan.png', 'ឡកែ', 3),
+              _buildBottomNavItem('assets/icons/talisman.png', 'យ័ន្ត', 4),
+            ],
+            selectedItemColor: _getSelectedItemColor(_selectedIndex),
+            unselectedItemColor: Colors.black,
+            unselectedLabelStyle: const TextStyle(
+              fontFamily: 'Dangrek',
+              color: Colors.black,
+              fontSize: 16,
+            ),
+            selectedLabelStyle: TextStyle(
+              fontFamily: 'Dangrek',
+              color: _getSelectedItemColor(_selectedIndex),
+              fontSize: 16,
+            ),
+            selectedFontSize: 16,
+            unselectedFontSize: 16,
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildMenuButton(String text) {
-    return ElevatedButton(
-      key: _buttonKeys[text],
-      onPressed: () => _showMenuOverlay(context, text),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white.withValues(alpha:0.7),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+
+  Widget _buildBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/bg.jpg'),
+          fit: BoxFit.cover,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Dangrek',
-        ),
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(color: Colors.black.withValues(alpha: 0.4)),
       ),
     );
   }
@@ -308,13 +424,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 boxShadow: _selectedIndex == index
                     ? [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha:0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),
                   BoxShadow(
-                    color: Colors.white.withValues(alpha:0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     spreadRadius: -2,
                     blurRadius: 5,
                     offset: const Offset(0, -2),
@@ -322,13 +438,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ]
                     : [
                   BoxShadow(
-                    color: Colors.white.withValues(alpha:0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     spreadRadius: -2,
                     blurRadius: 5,
                     offset: const Offset(0, -2),
                   ),
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha:0.5),
+                    color: Colors.grey.withValues(alpha: 0.5),
                     spreadRadius: 2,
                     blurRadius: 5,
                     offset: const Offset(0, 2),

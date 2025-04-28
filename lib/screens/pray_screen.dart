@@ -5,8 +5,9 @@ import 'package:lottie/lottie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:masterelf/screens/moon_blocks_screen.dart';
 import 'package:intl/intl.dart';
-import 'dart:async'; // For Timer
+import 'dart:async';
 
 class PrayScreen extends StatefulWidget {
   const PrayScreen({super.key});
@@ -17,30 +18,26 @@ class PrayScreen extends StatefulWidget {
 
 class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
   bool _showList = true;
-
-  // Video player variables
   late VideoPlayerController _controller;
   bool _isLoading = true;
   bool _isVideoAnimationCompleted = false;
   bool _isBuffering = false;
   late AnimationController _videoAnimationController;
-
-  // Playlist variables
   bool _isPlaylistExpanded = false;
   int? _selectedIndex;
+
   final List<String> _playlistItems = [
     "ក្រឡុកស៊ីមស៊ី",
-    "ផ្សងក្រឡាប់",
-    "ព្យាបាលចិត្ត",
-    "ដេញចង្រៃ",
-    "ដាស់ហេង",
+    "ក្រឡាប់ព្រះច័ន្ទ",
+    "រៀបចំសែនព្រេន",
+    "កាត់ឆុងលើករាសី",
   ];
+
+  // Updated video URLs
   final List<String> _videoUrls = [
-    'assets/videos/pray.mp4',
-    'https://masterelf.vip/wp-content/uploads/app/pray1.mp4',
-    'https://masterelf.vip/wp-content/uploads/app/pray2.mp4',
-    'https://masterelf.vip/wp-content/uploads/app/pray3.mp4',
-    'https://masterelf.vip/wp-content/uploads/app/pray4.mp4',
+    'assets/videos/pray.mp4', // Default video
+    'https://period9.masterelf.vip/app/period9/mindtreatment.mp4',
+    'https://period9.masterelf.vip/app/period9/blessing.mp4'
   ];
 
   // Kau Cim game variables
@@ -69,15 +66,55 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    _initializeDefaultVideo();
+    _initializeVideoPlayer();
     _loadPlayData();
     _startAccelerometer();
+  }
+
+  void _initializeVideoPlayer() async {
+    setState(() {
+      _isLoading = true;
+      _isVideoAnimationCompleted = false;
+    });
+
+    // First try to load the updated video
+    try {
+      final updatedController = VideoPlayerController.networkUrl(
+        Uri.parse('https://period9.masterelf.vip/app/period9/pray_update.mp4'),
+      );
+
+      await updatedController.initialize();
+
+      // If successful, use the updated video
+      _controller = updatedController;
+      setState(() {
+        _isLoading = false;
+      });
+      _controller.play();
+      _controller.setLooping(true);
+    } catch (e) {
+      // If failed, fall back to default asset video
+      _controller = VideoPlayerController.asset(_videoUrls[0])
+        ..initialize().then((_) {
+          setState(() {
+            _isLoading = false;
+          });
+          _controller.play();
+          _controller.setLooping(true);
+        }).catchError((error) {
+          setState(() {
+            _isLoading = false;
+          });
+        });
+    }
+
+    _controller.addListener(_onVideoCompletion);
+    _controller.addListener(_onBufferingUpdate);
   }
 
   void _handleShake() {
     if (!_isGameAnimating) return;
 
-    // Start shake timer if this is the first shake
     if (!_isShaking) {
       setState(() {
         _isShaking = true;
@@ -85,14 +122,12 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
       });
       _gameAnimationController.repeat();
 
-      // Start a timer to track shake duration
       _shakeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
         if (_isShaking) {
           setState(() {
             _shakeDuration += const Duration(seconds: 1);
           });
 
-          // Check if 5 seconds have passed
           if (_shakeDuration.inSeconds >= 5) {
             _finishGameAnimation();
             timer.cancel();
@@ -105,11 +140,11 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
   }
 
   void _startGame() {
-    if (_playsToday >= 30) {
+    if (_playsToday >= 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '១ថ្ងៃ យើងផ្សងបានតែ ៣ដង ទេ!\nវេលាស្អែកទើបអាចក្រឡុកផ្សងម្តងទៀតបាន',
+            '១ថ្ងៃ យើងផ្សងបាន ៣ដង!\nវេលាស្អែកទើបអាចផ្សងទៀតបាន',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Siemreap',
@@ -123,9 +158,9 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          backgroundColor: Colors.redAccent.withValues(alpha:0.8),
+          backgroundColor: Colors.redAccent.withValues(alpha: 0.8),
           width: 300,
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -134,7 +169,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '✨ ក្រឡុកទូរស័ព្ទ ដើម្បីក្រឡុកកំប៉ុងចង្កឹះ ✨',
+          '✨ ក្រឡុកទូរស័ព្ទ ✨',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Siemreap',
@@ -150,6 +185,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
         ),
         backgroundColor: Colors.transparent,
         width: 300,
+        duration: const Duration(seconds: 2)
       ),
     );
 
@@ -335,7 +371,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
       _showGame = false;
       _showGameResult = false;
       _isGameAnimating = false;
-      _showList = true; // Show the list again when game closes
+      _showList = true;
     });
   }
 
@@ -346,13 +382,12 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
 
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(alpha:0.5),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: Stack(
           children: [
-            // Blurred background container
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: BackdropFilter(
@@ -360,15 +395,15 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha:0.3),
+                    color: Colors.red.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha:0.3),
+                      color: Colors.white.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha:0.2),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 30,
                         spreadRadius: 5,
                       ),
@@ -377,7 +412,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const SizedBox(height: 60), // Increased space for logo
+                      const SizedBox(height: 60),
                       Text(
                         "លទ្ធផលចង្កឹះ លេខ #$_resultNumber - $fortuneType",
                         style: const TextStyle(
@@ -386,14 +421,14 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                           color: Colors.white,
                           fontFamily: 'Dangrek',
                         ),
-                        textAlign: TextAlign.center, // Centered the heading
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 15),
                       Text(
                         "This is where the detailed interpretation for fortune stick #$_resultNumber would appear.",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white.withValues(alpha:0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontFamily: 'Siemreap',
                         ),
                         textAlign: TextAlign.center,
@@ -406,13 +441,13 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                           child: ElevatedButton(
                             onPressed: () => Navigator.pop(context),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red.withValues(alpha:0.5),
+                              backgroundColor: Colors.red.withValues(alpha: 0.5),
                               foregroundColor: Colors.white,
                               textStyle: const TextStyle(fontFamily: 'Dangrek'),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                                 side: BorderSide(
-                                  color: Colors.white.withValues(alpha:0.3),
+                                  color: Colors.white.withValues(alpha: 0.3),
                                   width: 1,
                                 ),
                               ),
@@ -426,10 +461,8 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                 ),
               ),
             ),
-
-            // Logo positioned at top (half inside dialog)
             Positioned(
-              top: -40, // Adjusted to make logo half outside
+              top: -40,
               left: 0,
               right: 0,
               child: Center(
@@ -526,8 +559,8 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                             style: const TextStyle(
                               fontSize: 48,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white, // Changed to white
-                              fontFamily: 'Dangrek', // Added Dangrek font
+                              color: Colors.white,
+                              fontFamily: 'Dangrek',
                             ),
                           ),
                         ],
@@ -548,11 +581,11 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                       child: ElevatedButton(
                         onPressed: _closeGame,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.withValues(alpha:0.5),
+                          backgroundColor: Colors.red.withValues(alpha: 0.5),
                           foregroundColor: Colors.white,
                           textStyle: const TextStyle(fontFamily: 'Dangrek'),
                         ),
-                        child: const Text('ឈប់ក្រឡុក'),
+                        child: const Text('ចេញទៅវិញ'),
                       ),
                     ),
                   ),
@@ -573,10 +606,10 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                 child: Container(
                   width: 120.0,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha:0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(12.0),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha:0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       width: 1.0,
                     ),
                   ),
@@ -605,46 +638,94 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                       ),
 
                       if (_isPlaylistExpanded)
-                        ..._playlistItems.asMap().entries.map((entry) {
-                          int index = entry.key;
-                          String item = entry.value;
-                          return GestureDetector(
-                            onTap: () {
-                              if (index == 0) {
-                                _startGame();
-                              } else {
-                                setState(() {
-                                  _selectedIndex = index;
-                                  _showGame = false;
-                                  _isPlaylistExpanded = false;
-                                });
-                                _replaceVideo(_videoUrls[index]);
-                              }
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                                horizontal: 12.0,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _selectedIndex == index
-                                    ? Colors.yellow.withValues(alpha:0.3)
-                                    : Colors.transparent,
-                                borderRadius: BorderRadius.circular(4.0),
-                              ),
-                              child: Text(
-                                item,
-                                style: const TextStyle(
-                                  fontFamily: 'Dangrek',
-                                  color: Colors.white,
-                                  fontSize: 14.0,
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: _playlistItems.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () async {
+                                if (index == 0) {
+                                  _startGame(); // First item - Kau Cim game
+                                } else if (index == 1) {
+                                  // Second item - Moon Blocks game
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const MoonBlocksScreen(),
+                                    ),
+                                  );
+                                } else {
+                                  // Handle special videos for index 2 and 3
+                                  try {
+                                    String videoUrl;
+                                    if (index == 2) {
+                                      videoUrl = 'https://period9.masterelf.vip/app/period9/mindtreatment.mp4';
+                                    } else {
+                                      videoUrl = 'https://period9.masterelf.vip/app/period9/blessing.mp4';
+                                    }
+
+                                    final newController = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
+                                    await newController.initialize();
+
+                                    _controller.dispose();
+                                    _controller = newController;
+                                    setState(() {
+                                      _selectedIndex = index;
+                                      _showGame = false;
+                                      _isPlaylistExpanded = false;
+                                    });
+                                    _controller.play();
+                                    _controller.setLooping(true);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Nothing can be done at the moment'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                    // Continue playing default video
+                                    _replaceVideo(_videoUrls[0]);
+                                  }
+                                }
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 12.0,
                                 ),
-                                textAlign: TextAlign.center,
+                                decoration: BoxDecoration(
+                                  color: _selectedIndex == index
+                                      ? Colors.yellow.withValues(alpha: 0.3)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(4.0),
+                                ),
+                                child: Text(
+                                  _playlistItems[index],
+                                  style: const TextStyle(
+                                    fontFamily: 'Dangrek',
+                                    color: Colors.white,
+                                    fontSize: 14.0,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                          );
-                        }),
+                            );
+                          },
+                          separatorBuilder: (context, index) {
+                            // Add divider after the second item (index 1)
+                            return index == 1
+                                ? Divider(
+                              color: Colors.white.withOpacity(0.5),
+                              height: 1,
+                              thickness: 1,
+                              indent: 16,
+                              endIndent: 16,
+                            )
+                                : const SizedBox.shrink();
+                          },
+                        ),
                     ],
                   ),
                 ),
