@@ -146,8 +146,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         alignment: Alignment.center,
                         children: [
                           SizedBox(
-                            width: 60,
-                            height: 60,
+                            width: 70,
+                            height: 70,
                             child: Lottie.asset(
                               'assets/jsons/lightray.json',
                               controller: _lottieAnimationController,
@@ -222,13 +222,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: Colors.black.withOpacity(0.5),
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(20),
                     bottomRight: Radius.circular(20),
                   ),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: Colors.white.withOpacity(0.2),
                     width: 1,
                   ),
                 ),
@@ -238,23 +238,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Align(
                       alignment: Alignment.topRight,
                       child: IconButton(
-                        icon: Icon(Icons.close, color: Colors.white),
+                        icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                        padding: const EdgeInsets.all(14), // Reduced padding
                         onPressed: _closeMenu,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        bottom: 20,
-                      ),
+                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12), // Reduced padding
                       child: Row(
                         children: [
                           CircleAvatar(
-                            radius: 30,
+                            radius: 24, // Slightly smaller avatar
                             backgroundImage: AssetImage('assets/images/profileicon.png'),
                           ),
-                          const SizedBox(width: 15),
+                          const SizedBox(width: 12), // Reduced spacing
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -263,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 style: TextStyle(
                                   fontFamily: 'Dangrek',
                                   color: Colors.white,
-                                  fontSize: 18,
+                                  fontSize: 18, // Slightly smaller font
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -271,8 +268,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 'កម្មវិធីយុគ9 (V1.8)',
                                 style: TextStyle(
                                   fontFamily: 'Dangrek',
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  fontSize: 14,
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 14, // Slightly smaller font
                                 ),
                               ),
                             ],
@@ -288,34 +285,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4), // Reduced vertical padding
                                 child: Text(
                                   entry.key,
                                   style: TextStyle(
                                     fontFamily: 'Dangrek',
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: 16, // Slightly smaller font
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                               ...entry.value.map((item) {
-                                return ListTile(
-                                  title: Text(
-                                    item['title']!,
-                                    style: TextStyle(
-                                      fontFamily: 'Dangrek',
-                                      color: Colors.white.withValues(alpha: 0.8),
-                                      fontSize: 14,
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8), // Reduced horizontal padding
+                                  child: ListTile(
+                                    dense: true, // Makes the ListTile more compact
+                                    visualDensity: const VisualDensity(vertical: -4), // Further reduces vertical space
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12), // Reduced internal padding
+                                    title: Text(
+                                      item['title']!,
+                                      style: TextStyle(
+                                        fontFamily: 'Dangrek',
+                                        color: Colors.white.withOpacity(0.8),
+                                        fontSize: 14, // Slightly smaller font
+                                      ),
                                     ),
+                                    onTap: () => _navigateTo(item['url']!),
                                   ),
-                                  onTap: () => _navigateTo(item['url']!),
                                 );
                               }),
                               const Divider(
                                 color: Colors.white24,
-                                height: 20,
-                                thickness: 1,
+                                height: 8, // Reduced divider height
+                                thickness: 0.5, // Thinner divider
                                 indent: 16,
                                 endIndent: 16,
                               ),
@@ -325,13 +328,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20), // Reduced padding
                       child: Text(
                         'Developed by: \nStonechat Communications\n\nក្រុមហ៊ុនហុងស៊ុយ ម៉ាស្ទ័អេល\nMaster Elf Feng Shui 风水 ™️\n©️2026 - All rights reserved.',
                         style: TextStyle(
                           fontFamily: 'Dangrek',
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.6),
+                          fontSize: 10, // Slightly smaller font
                         ),
                       ),
                     ),
