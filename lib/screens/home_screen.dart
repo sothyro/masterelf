@@ -131,60 +131,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           _buildBackground(),
           _pages[_selectedIndex],
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: GestureDetector(
-                      onTap: _toggleMenu,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 70,
-                            height: 70,
-                            child: Lottie.asset(
-                              'assets/jsons/lightray.json',
-                              controller: _lottieAnimationController,
-                              animate: true,
-                              repeat: true,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Image.asset(
-                              'assets/icons/menu.png',
-                              width: 50,
-                              height: 50,
-                            ),
-                          ),
-                        ],
+          // Positioned widget gives more precise control than Align for this case
+          Positioned(
+            top: MediaQuery.of(context).padding.top - 20, // Adjust this value to move up/down
+            left: 0,
+            right: 0,
+            child: Center( // This ensures horizontal centering
+              child: GestureDetector(
+                onTap: _toggleMenu,
+                child: SizedBox(
+                  width: 200,
+                  height: 100,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Wave animation
+                      SizedBox(
+                        width: 200,
+                        height: 100,
+                        child: Lottie.asset(
+                          'assets/jsons/wave.json',
+                          controller: _lottieAnimationController,
+                          animate: true,
+                          repeat: true,
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                    ),
-                  ),
-                  SlideTransition(
-                    position: _menuTextAnimation,
-                    child: Text(
-                      'MENU',
-                      style: TextStyle(
-                        fontFamily: 'Dangrek',
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      // Menu icon
+                      Image.asset(
+                        'assets/icons/menu.png',
+                        width: 150,
+                        height: 70,
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -397,7 +378,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
-
 
   Widget _buildBackground() {
     return Container(
