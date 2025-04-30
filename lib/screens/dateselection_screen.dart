@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lunar/lunar.dart';
+import 'package:collection/collection.dart'; // For firstWhereOrNull
 
 void main() {
   runApp(const MaterialApp(home: DateSelectionScreen()));
@@ -12,6 +13,14 @@ class DateSelectionScreen extends StatefulWidget {
 
   @override
   State<DateSelectionScreen> createState() => _DateSelectionScreenState();
+}
+
+class TimePeriod {
+  final String period;
+  final String type; // 'auspicious', 'inauspicious', 'neutral'
+  final String description;
+
+  TimePeriod(this.period, this.type, this.description);
 }
 
 class _DateSelectionScreenState extends State<DateSelectionScreen>
@@ -71,7 +80,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
           // Blur Overlay
           BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(color: Colors.black.withValues(alpha: 0.3)),
+            child: Container(color: Colors.black.withOpacity(0.3)),
           ),
 
           // Lottie Animation
@@ -228,14 +237,11 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
         margin: const EdgeInsets.all(1),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isToday ? Colors.amber : Colors.grey.withValues(alpha: 0.5),
+            color: isToday ? Colors.amber : Colors.grey.withOpacity(0.5),
             width: isToday ? 1.5 : 0.5,
           ),
           borderRadius: BorderRadius.circular(4),
-          color:
-              isToday
-                  ? Colors.amber.withValues(alpha: 0.1)
-                  : Colors.transparent,
+          color: isToday ? Colors.amber.withOpacity(0.1) : Colors.transparent,
         ),
         child: Center(
           child: Column(
@@ -254,7 +260,6 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                   currentLunar.getDayInChinese(),
                   style: TextStyle(
                     fontSize: 12,
-                    //fontWeight: FontWeight.bold,
                     color: isToday ? Colors.amber : Colors.blue,
                   ),
                 ),
@@ -266,23 +271,26 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
   }
 
   void _showDayDetails(Lunar lunar, DateTime solarDate) {
+    final timeClassifications = _getAllTimeClassifications(lunar);
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.deepPurpleAccent.withValues(alpha: 0.4),
+          backgroundColor: Colors.deepPurpleAccent.withOpacity(0.4),
           content: Stack(
             children: [
               BackdropFilter(
                 filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-                child: Container(decoration: BoxDecoration(color: Colors.transparent)),
+                child: Container(
+                  decoration: BoxDecoration(color: Colors.transparent),
+                ),
               ),
-
               Padding(
                 padding: const EdgeInsets.only(top: 40.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SingleChildScrollView(
@@ -330,7 +338,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
 
-                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+                        Divider(color: Colors.white.withOpacity(0.5)),
 
                         // Zodiac information
                         Padding(
@@ -381,7 +389,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
 
-                        Divider(color: Colors.white.withValues(alpha: 0.5)),
+                        Divider(color: Colors.white.withOpacity(0.5)),
 
                         // Combined activities and fortune information
                         Padding(
@@ -400,7 +408,10 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                                 child: Text(
                                   _getAuspiciousActivities(lunar),
                                   style: TextStyle(
@@ -421,7 +432,10 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                                 child: Text(
                                   _getInauspiciousActivities(lunar),
                                   style: TextStyle(
@@ -444,7 +458,10 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                                 child: Text(
                                   _getDailyFortune(lunar),
                                   style: TextStyle(
@@ -467,7 +484,10 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 4),
+                                padding: const EdgeInsets.only(
+                                  top: 4,
+                                  bottom: 4,
+                                ),
                                 child: Text(
                                   '${_getMonthlyFetalPosition(lunar)} ${_getDailyFetalPosition(lunar)}',
                                   style: TextStyle(
@@ -475,6 +495,37 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                                     color: Colors.white,
                                     fontFamily: 'Siemreap',
                                   ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Auspicious and Inauspicious Times Section
+                        Divider(color: Colors.white.withOpacity(0.5)),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '🕒 ម៉ោងឆុង រឺហេង',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.deepPurple,
+                                  fontFamily: 'Dangrek',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildTimeTable(timeClassifications),
+                              const SizedBox(height: 8),
+                              Text(
+                                'ចំណាំ: ពេលវេលាធម្មតាអាចប្រើសម្រាប់ការងារធម្មតា',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.white70,
+                                  fontFamily: 'Siemreap',
                                 ),
                               ),
                             ],
@@ -506,9 +557,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurpleAccent.withValues(
-                    alpha: 0.5,
-                  ),
+                  backgroundColor: Colors.deepPurpleAccent.withOpacity(0.5),
                   foregroundColor: Colors.white,
                   textStyle: const TextStyle(fontFamily: 'Dangrek'),
                 ),
@@ -524,7 +573,6 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
 
   // Get Daily Fortune (using getDayLu)
   String _getDailyFortune(Lunar lunar) {
-    // getDayLu() returns a String containing the fortunes for the day
     final String dailyFortunesString = lunar.getDayLu();
 
     // Split the string into a list of fortunes
@@ -532,7 +580,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
 
     // Check if the list is empty before attempting to join
     if (dailyFortunes.isEmpty) {
-      return "ថ្ងៃនេះមិនមានលាភសំណាងសោះ"; // Or some other default message
+      return "ថ្ងៃនេះមិនមានលាភសំណាងសោះ";
     }
 
     // Join the fortunes into a single string, separated by commas
@@ -540,21 +588,13 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
   }
 
   String _getDailyFetalPosition(Lunar lunar) {
-    //getDayPositionTai() directly returns the Chinese string representation of the daily fetal position
-    // You don't need to use getDayPositionTaiDesc.
     final String dailyFetalPosition = lunar.getDayPositionTai();
-
-    // You can translate the Chinese position into Khmer here if needed
     return _translateFetalPositionToKhmer(dailyFetalPosition);
   }
 
   // Get Monthly Fetal Position (using getMonthPositionTai)
   String _getMonthlyFetalPosition(Lunar lunar) {
-    // getMonthPositionTai() directly returns the Chinese string representation of the monthly fetal position.
-    // You don't need to use getMonthPositionTaiDesc.
     final String monthlyFetalPosition = lunar.getMonthPositionTai();
-
-    // You can translate the Chinese position into Khmer here if needed
     return _translateFetalPositionToKhmer(monthlyFetalPosition);
   }
 
@@ -753,7 +793,6 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
 
   // Translate Chinese to Khmer
   String _translateToKhmer(String text) {
-    // Updated to translate the Earthly Branches (day zodiacs)
     switch (text) {
       case "子":
         return "ជូត";
@@ -785,9 +824,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
   }
 
   String _translateActivityToKhmer(String text) {
-    // Updated to translate the Earthly Branches (day zodiacs)
     switch (text) {
-      //activity
       case "开光":
         return "បើកការដ្ឋាន";
       case "塑绘":
@@ -972,6 +1009,203 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
     return monthNames[month - 1];
   }
 
+  // Get inauspicious hour for a given branch
+  String _getInauspiciousHour(String dayZhi) {
+    final Map<String, String> branchClashes = {
+      "子": "午", // Rat clashes with Horse
+      "丑": "未", // Ox clashes with Goat
+      "寅": "申", // Tiger clashes with Monkey
+      "卯": "酉", // Rabbit clashes with Rooster
+      "辰": "戌", // Dragon clashes with Dog
+      "巳": "亥", // Snake clashes with Pig
+      "午": "子", // Horse clashes with Rat
+      "未": "丑", // Goat clashes with Ox
+      "申": "寅", // Monkey clashes with Tiger
+      "酉": "卯", // Rooster clashes with Rabbit
+      "戌": "辰", // Dog clashes with Dragon
+      "亥": "巳", // Pig clashes with Snake
+    };
+
+    final String? conflictingBranch = branchClashes[dayZhi];
+    if (conflictingBranch == null) return "";
+
+    return _branchToHour(conflictingBranch);
+  }
+
+  List<TimePeriod> _getAllTimeClassifications(Lunar lunar) {
+    final String dayZhi = lunar.getDayInGanZhi().substring(1);
+    final String badHour = _getInauspiciousHour(dayZhi);
+    final List<String> goodHours = _getRawAuspiciousTimes(dayZhi);
+
+    const List<String> allPeriods = [
+      "23:00-01:00",
+      "01:00-03:00",
+      "03:00-05:00",
+      "05:00-07:00",
+      "07:00-09:00",
+      "09:00-11:00",
+      "11:00-13:00",
+      "13:00-15:00",
+      "15:00-17:00",
+      "17:00-19:00",
+      "19:00-21:00",
+      "21:00-23:00",
+    ];
+
+    return allPeriods.map((period) {
+      if (goodHours.contains(period)) {
+        return TimePeriod(period, 'ម៉ោងមង្គលហេង', 'ល្អសម្រាប់ការងារសំខាន់ៗ');
+      } else if (period == badHour) {
+        return TimePeriod(period, 'ម៉ោងឡាក់ឆុង', 'គួរជៀសវាង');
+      } else {
+        return TimePeriod(period, 'វេលាធម្មតា', 'សម្រាប់ការងារធម្មតា');
+      }
+    }).toList();
+  }
+
+  List<String> _getRawAuspiciousTimes(String dayZhi) {
+    final Map<String, List<String>> auspiciousTimesMap = {
+      "子": ["23:00-01:00"], // Rat
+      "丑": ["01:00-03:00"], // Ox
+      "寅": ["03:00-05:00"], // Tiger
+      "卯": ["05:00-07:00"], // Rabbit
+      "辰": ["07:00-09:00"], // Dragon
+      "巳": ["09:00-11:00"], // Snake
+      "午": ["11:00-13:00"], // Horse
+      "未": ["13:00-15:00"], // Goat
+      "申": ["15:00-17:00"], // Monkey
+      "酉": ["17:00-19:00"], // Rooster
+      "戌": ["19:00-21:00"], // Dog
+      "亥": ["21:00-23:00"], // Pig
+    };
+
+    final List<String> times = [...?auspiciousTimesMap[dayZhi]];
+    final String? harmoniousHour = _getHarmoniousHour(dayZhi);
+    final String badHour = _getInauspiciousHour(dayZhi);
+
+    if (harmoniousHour != null && harmoniousHour != badHour) {
+      times.add(harmoniousHour);
+    }
+
+    return times;
+  }
+
+  Widget _buildTimeTable(List<TimePeriod> periods) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columnSpacing: 20,
+        dataRowHeight: 40,
+        headingRowHeight: 40,
+        columns: const [
+          DataColumn(
+            label: Text('ម៉ោង', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          DataColumn(
+            label: Text(
+              'ឆុងហេង',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              'ពិពណ៌នា',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+        rows:
+            periods.map((period) {
+              Color color = Colors.grey;
+              if (period.type == 'ម៉ោងមង្គលហេង') color = Colors.green;
+              if (period.type == 'ម៉ោងឡាក់ឆុង') color = Colors.red;
+
+              return DataRow(
+                cells: [
+                  DataCell(
+                    Text(period.period, style: const TextStyle(fontSize: 12)),
+                  ),
+                  DataCell(
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: color.withOpacity(0.5)),
+                      ),
+                      child: Text(
+                        period.type,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 12,
+                          fontFamily:
+                              'Dangrek', // <-- Add your font family here
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Text(
+                      period.description,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+      ),
+    );
+  }
+
+  // Helper to get harmonious hour (六合)
+  String? _getHarmoniousHour(String dayZhi) {
+    final Map<String, String> harmonies = {
+      "子": "丑", // Rat harmonizes with Ox (01:00-03:00)
+      "寅": "亥", // Tiger with Pig (21:00-23:00)
+      "卯": "戌", // Rabbit with Dog (19:00-21:00)
+      "辰": "酉", // Dragon with Rooster (17:00-19:00)
+      "巳": "申", // Snake with Monkey (15:00-17:00)
+      "午": "未", // Horse with Goat (13:00-15:00)
+    };
+
+    // Check if day branch is in harmony map
+    if (harmonies.containsKey(dayZhi)) {
+      final String harmoniousBranch = harmonies[dayZhi]!;
+      return _branchToHour(harmoniousBranch);
+    }
+
+    // Check reverse (some harmonies are bidirectional)
+    for (final entry in harmonies.entries) {
+      if (entry.value == dayZhi) {
+        return _branchToHour(entry.key);
+      }
+    }
+
+    return null;
+  }
+
+  // Convert branch to its primary hour
+  String _branchToHour(String branch) {
+    const Map<String, String> branchHours = {
+      "子": "23:00-01:00",
+      "丑": "01:00-03:00",
+      "寅": "03:00-05:00",
+      "卯": "05:00-07:00",
+      "辰": "07:00-09:00",
+      "巳": "09:00-11:00",
+      "午": "11:00-13:00",
+      "未": "13:00-15:00",
+      "申": "15:00-17:00",
+      "酉": "17:00-19:00",
+      "戌": "19:00-21:00",
+      "亥": "21:00-23:00",
+    };
+    return branchHours[branch] ?? "";
+  }
+
   // Build Custom Title with Blur Glass Morphism
   Widget _buildTitle() {
     return ClipRRect(
@@ -981,12 +1215,12 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.deepPurpleAccent.withValues(
-              alpha: 0.3,
+            color: Colors.deepPurpleAccent.withOpacity(
+              0.3,
             ), // Semi-transparent white
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3), // Light border
+              color: Colors.white.withOpacity(0.3), // Light border
               width: 2.2,
             ),
           ),
