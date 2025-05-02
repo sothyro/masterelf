@@ -717,7 +717,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                             // Add divider after the second item (index 1)
                             return index == 1
                                 ? Divider(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               height: 1,
                               thickness: 1,
                               indent: 16,

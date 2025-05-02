@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'about_screen.dart';
 import 'web_screen.dart';
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _animation;
   late AnimationController _menuTextAnimationController;
   late Animation<Offset> _menuTextAnimation;
-  late AnimationController _lottieAnimationController;
+  late AnimationController _waveAnimationController; // Renamed for clarity
   bool _isMenuOpen = false;
 
   final List<Widget> _pages = [
@@ -35,8 +36,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     AboutScreen(),
   ];
 
-  // Simplified menu structure
-  final Map<String, List<Map<String, String>>> _menuItems = {
+  final Map<String, List<Map<String, dynamic>>> _menuItems = {
     '🔥ហុងស៊ុយថ្មីយុគ9': [
       {'title': '     💠 វីដេអូ ·Vlogs', 'url': 'https://period9.masterelf.vip/vlogs'},
       {'title': '     💠 សៀវភៅយុគ9', 'url': 'https://period9.masterelf.vip/period9'},
@@ -48,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     '☯️ម៉ាស្ទ័រអេល': [
       {'title': '     💠 EVENTSថ្មី', 'url': 'https://period9.masterelf.vip/event'},
       {'title': '     💠 ទំនាក់ទំនង', 'url': 'about'},
-      {'title': '     💠 ណាត់ពិភាក្សា', 'url': 'https://period9.masterelf.vip/appointment'},
     ],
   };
 
@@ -57,6 +56,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _selectedIndex = index;
       _animationController.reset();
       _animationController.repeat(reverse: true);
+
+      // Play wave animation once when bottom nav item is pressed
+      _waveAnimationController.reset();
+      _waveAnimationController.forward();
     });
   }
 
@@ -83,10 +86,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       curve: Curves.easeInOut,
     ));
 
-    _lottieAnimationController = AnimationController(
+    // Wave animation controller - no longer looping
+    _waveAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 5),
-    )..repeat();
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.repeat(reverse: true);
@@ -97,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     _menuTextAnimationController.dispose();
-    _lottieAnimationController.dispose();
+    _waveAnimationController.dispose();
     super.dispose();
   }
 
@@ -122,6 +126,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _launchSocial(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomNavBarHeight = kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom;
@@ -131,12 +143,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           _buildBackground(),
           _pages[_selectedIndex],
-          // Positioned widget gives more precise control than Align for this case
           Positioned(
-            top: MediaQuery.of(context).padding.top - 20, // Adjust this value to move up/down
+            top: MediaQuery.of(context).padding.top - 20,
             left: 0,
             right: 0,
-            child: Center( // This ensures horizontal centering
+            child: Center(
               child: GestureDetector(
                 onTap: _toggleMenu,
                 child: SizedBox(
@@ -145,19 +156,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Wave animation
+                      // Wave animation - now plays once when triggered
                       SizedBox(
                         width: 200,
                         height: 100,
                         child: Lottie.asset(
                           'assets/jsons/wave.json',
-                          controller: _lottieAnimationController,
-                          animate: true,
-                          repeat: true,
-                          fit: BoxFit.contain,
+                          controller: _waveAnimationController,
+                          animate: false, // We'll control animation manually
                         ),
                       ),
-                      // Menu icon
+                      // Static menu icon
                       Image.asset(
                         'assets/icons/menu.png',
                         width: 150,
@@ -203,13 +212,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(20),
                     bottomRight: Radius.circular(20),
                   ),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),
@@ -220,19 +229,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       alignment: Alignment.topRight,
                       child: IconButton(
                         icon: const Icon(Icons.close, color: Colors.white, size: 24),
-                        padding: const EdgeInsets.all(14), // Reduced padding
+                        padding: const EdgeInsets.all(14),
                         onPressed: _closeMenu,
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12), // Reduced padding
+                      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
                       child: Row(
                         children: [
                           CircleAvatar(
-                            radius: 24, // Slightly smaller avatar
+                            radius: 24,
                             backgroundImage: AssetImage('assets/images/profileicon.png'),
                           ),
-                          const SizedBox(width: 12), // Reduced spacing
+                          const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -241,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 style: TextStyle(
                                   fontFamily: 'Dangrek',
                                   color: Colors.white,
-                                  fontSize: 18, // Slightly smaller font
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -249,8 +258,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 'កម្មវិធីយុគ9 (V1.8)',
                                 style: TextStyle(
                                   fontFamily: 'Dangrek',
-                                  color: Colors.white.withOpacity(0.8),
-                                  fontSize: 14, // Slightly smaller font
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
@@ -261,61 +270,84 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Expanded(
                       child: ListView(
                         padding: EdgeInsets.zero,
-                        children: _menuItems.entries.map((entry) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4), // Reduced vertical padding
-                                child: Text(
-                                  entry.key,
-                                  style: TextStyle(
-                                    fontFamily: 'Dangrek',
-                                    color: Colors.white,
-                                    fontSize: 16, // Slightly smaller font
-                                    fontWeight: FontWeight.bold,
+                        children: [
+                          ..._menuItems.entries.map((entry) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                                  child: Text(
+                                    entry.key,
+                                    style: TextStyle(
+                                      fontFamily: 'Dangrek',
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              ...entry.value.map((item) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8), // Reduced horizontal padding
-                                  child: ListTile(
-                                    dense: true, // Makes the ListTile more compact
-                                    visualDensity: const VisualDensity(vertical: -4), // Further reduces vertical space
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12), // Reduced internal padding
-                                    title: Text(
-                                      item['title']!,
-                                      style: TextStyle(
-                                        fontFamily: 'Dangrek',
-                                        color: Colors.white.withOpacity(0.8),
-                                        fontSize: 14, // Slightly smaller font
+                                ...entry.value.map((item) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: ListTile(
+                                      dense: true,
+                                      visualDensity: const VisualDensity(vertical: -4),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                                      title: Text(
+                                        item['title']!,
+                                        style: TextStyle(
+                                          fontFamily: 'Dangrek',
+                                          color: Colors.white.withValues(alpha: 0.8),
+                                          fontSize: 14,
+                                        ),
                                       ),
+                                      onTap: () => _navigateTo(item['url']!),
                                     ),
-                                    onTap: () => _navigateTo(item['url']!),
-                                  ),
-                                );
-                              }),
-                              const Divider(
-                                color: Colors.white24,
-                                height: 8, // Reduced divider height
-                                thickness: 0.5, // Thinner divider
-                                indent: 16,
-                                endIndent: 16,
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                                  );
+                                }),
+                                const Divider(
+                                  color: Colors.white24,
+                                  height: 8,
+                                  thickness: 0.5,
+                                  indent: 16,
+                                  endIndent: 16,
+                                ),
+                              ],
+                            );
+                          }).toList(),
+
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                IconButton(
+                                  icon: Image.asset('assets/icons/facebook.png', width: 40, height: 40),
+                                  onPressed: () => _launchSocial('https://www.facebook.com/masterelf.fengshui'),
+                                ),
+                                IconButton(
+                                  icon: Image.asset('assets/icons/telegram.png', width: 40, height: 40),
+                                  onPressed: () => _launchSocial('https://t.me/masterelf'),
+                                ),
+                                IconButton(
+                                  icon: Image.asset('assets/icons/whatapp.png', width: 40, height: 40),
+                                  onPressed: () => _launchSocial('https://wa.me/855123456789'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(20), // Reduced padding
+                      padding: const EdgeInsets.all(20),
                       child: Text(
                         'Developed by: \nStonechat Communications\n\nក្រុមហ៊ុនហុងស៊ុយ ម៉ាស្ទ័អេល\nMaster Elf Feng Shui 风水 ™️\n©️2026 - All rights reserved.',
                         style: TextStyle(
                           fontFamily: 'Dangrek',
-                          color: Colors.white.withOpacity(0.6),
-                          fontSize: 10, // Slightly smaller font
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 10,
                         ),
                       ),
                     ),

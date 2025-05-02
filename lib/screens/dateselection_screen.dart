@@ -2,10 +2,17 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lunar/lunar.dart';
-import 'package:collection/collection.dart'; // For firstWhereOrNull
+import 'dart:math'; // Add this line with other imports
 
 void main() {
   runApp(const MaterialApp(home: DateSelectionScreen()));
+}
+
+class TimePeriod {
+  final String period;
+  final String type; // Removed influences list
+
+  TimePeriod(this.period, this.type); // Simplified constructor
 }
 
 class DateSelectionScreen extends StatefulWidget {
@@ -15,13 +22,6 @@ class DateSelectionScreen extends StatefulWidget {
   State<DateSelectionScreen> createState() => _DateSelectionScreenState();
 }
 
-class TimePeriod {
-  final String period;
-  final String type; // 'auspicious', 'inauspicious', 'neutral'
-  final String description;
-
-  TimePeriod(this.period, this.type, this.description);
-}
 
 class _DateSelectionScreenState extends State<DateSelectionScreen>
     with TickerProviderStateMixin {
@@ -80,7 +80,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
           // Blur Overlay
           BackdropFilter(
             filter: ui.ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-            child: Container(color: Colors.black.withOpacity(0.3)),
+            child: Container(color: Colors.black.withValues(alpha: 0.3)),
           ),
 
           // Lottie Animation
@@ -237,11 +237,11 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
         margin: const EdgeInsets.all(1),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isToday ? Colors.amber : Colors.grey.withOpacity(0.5),
+            color: isToday ? Colors.amber : Colors.grey.withValues(alpha: 0.5),
             width: isToday ? 1.5 : 0.5,
           ),
           borderRadius: BorderRadius.circular(4),
-          color: isToday ? Colors.amber.withOpacity(0.1) : Colors.transparent,
+          color: isToday ? Colors.amber.withValues(alpha: 0.1) : Colors.transparent,
         ),
         child: Center(
           child: Column(
@@ -277,7 +277,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.deepPurpleAccent.withOpacity(0.4),
+          backgroundColor: Colors.deepPurpleAccent.withValues(alpha: 0.4),
           content: Stack(
             children: [
               BackdropFilter(
@@ -290,7 +290,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                 padding: const EdgeInsets.only(top: 40.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: SingleChildScrollView(
@@ -338,7 +338,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
 
-                        Divider(color: Colors.white.withOpacity(0.5)),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         // Zodiac information
                         Padding(
@@ -389,7 +389,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
 
-                        Divider(color: Colors.white.withOpacity(0.5)),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
 
                         // Combined activities and fortune information
                         Padding(
@@ -501,7 +501,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
                           ),
                         ),
                         // Auspicious and Inauspicious Times Section
-                        Divider(color: Colors.white.withOpacity(0.5)),
+                        Divider(color: Colors.white.withValues(alpha: 0.5)),
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
@@ -557,7 +557,7 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurpleAccent.withOpacity(0.5),
+                  backgroundColor: Colors.deepPurpleAccent.withValues(alpha: 0.5),
                   foregroundColor: Colors.white,
                   textStyle: const TextStyle(fontFamily: 'Dangrek'),
                 ),
@@ -1033,35 +1033,80 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
   }
 
   List<TimePeriod> _getAllTimeClassifications(Lunar lunar) {
-    final String dayZhi = lunar.getDayInGanZhi().substring(1);
-    final String badHour = _getInauspiciousHour(dayZhi);
-    final List<String> goodHours = _getRawAuspiciousTimes(dayZhi);
-
-    const List<String> allPeriods = [
-      "23:00-01:00",
-      "01:00-03:00",
-      "03:00-05:00",
-      "05:00-07:00",
-      "07:00-09:00",
-      "09:00-11:00",
-      "11:00-13:00",
-      "13:00-15:00",
-      "15:00-17:00",
-      "17:00-19:00",
-      "19:00-21:00",
-      "21:00-23:00",
+    const allPeriods = [
+      "23:00-01:00", "01:00-03:00", "03:00-05:00",
+      "05:00-07:00", "07:00-09:00", "09:00-11:00",
+      "11:00-13:00", "13:00-15:00", "15:00-17:00",
+      "17:00-19:00", "19:00-21:00", "21:00-23:00"
     ];
 
-    return allPeriods.map((period) {
-      if (goodHours.contains(period)) {
-        return TimePeriod(period, 'ម៉ោងមង្គលហេង', 'ល្អសម្រាប់ការងារសំខាន់ៗ');
-      } else if (period == badHour) {
-        return TimePeriod(period, 'ម៉ោងឡាក់ឆុង', 'គួរជៀសវាង');
-      } else {
-        return TimePeriod(period, 'វេលាធម្មតា', 'សម្រាប់ការងារធម្មតា');
-      }
-    }).toList();
+    // Calculate raw scores
+    final scores = allPeriods.map((p) => _calculateRawScore(lunar, p)).toList();
+
+    // Force balanced distribution (4 Good, 4 Normal, 4 Bad)
+    final sortedIndices = List<int>.generate(scores.length, (i) => i)
+      ..sort((a, b) => scores[b].compareTo(scores[a]));
+
+    final classifications = List<String>.filled(scores.length, 'ធម្មតា');
+
+    // Set top 4 as Good
+    for (int i = 0; i < 4; i++) {
+      classifications[sortedIndices[i]] = 'ហេង';
+    }
+
+    // Set bottom 4 as Bad
+    for (int i = scores.length - 1; i >= scores.length - 4; i--) {
+      classifications[sortedIndices[i]] = 'ឆុង';
+    }
+
+    return List.generate(allPeriods.length, (i) {
+      return TimePeriod(allPeriods[i], classifications[i]);
+    });
   }
+
+double _calculateRawScore(Lunar lunar, String period) {
+  // Basic components (no randomness)
+  final clashScore = _getHourClashScore(lunar, period);
+  final deityScore = _getDeityScore(lunar, period);
+  final elementScore = _getElementScore(lunar, period);
+  final constellationScore = _getConstellationScore(lunar);
+
+  // Weighted sum (adjust weights as needed)
+  return clashScore * 0.4 +
+         deityScore * 0.3 +
+         elementScore * 0.2 +
+         constellationScore * 0.1;
+}
+
+List<String> _balancedClassification(List<double> scores) {
+  final sorted = [...scores]..sort();
+
+  // Force distribution (adjust these indices as needed):
+  final goodThreshold = sorted[7];  // Top 4 will be good
+  final badThreshold = sorted[4];   // Bottom 4 will be bad
+  // Middle 4 will be normal
+
+  return scores.map((score) {
+    if (score >= goodThreshold) return 'ហេង';      // Good
+    if (score <= badThreshold) return 'ឆុង';   // Bad
+    return 'ធម្មតា';                             // Normal
+  }).toList();
+}
+
+double _calculateBalancedScore(Lunar lunar, String period) {
+  final random = Random(); // Create instance once
+
+  final clashScore = _getHourClashScore(lunar, period) * 0.3;
+  final deityScore = _getDeityScore(lunar, period) * 0.4;
+  final elementScore = _getElementScore(lunar, period) * 0.2;
+  final constellationScore = _getConstellationScore(lunar) * 0.1;
+
+  // Small random variation (-0.15 to +0.15)
+  final variation = (random.nextDouble() * 0.3) - 0.15;
+
+  return clashScore + deityScore + elementScore + constellationScore + variation;
+}
+
 
   List<String> _getRawAuspiciousTimes(String dayZhi) {
     final Map<String, List<String>> auspiciousTimesMap = {
@@ -1090,75 +1135,182 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
     return times;
   }
 
-  Widget _buildTimeTable(List<TimePeriod> periods) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        columnSpacing: 20,
-        dataRowHeight: 40,
-        headingRowHeight: 40,
-        columns: const [
-          DataColumn(
-            label: Text('ម៉ោង', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          DataColumn(
-            label: Text(
-              'ឆុងហេង',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          DataColumn(
-            label: Text(
-              'ពិពណ៌នា',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-        rows:
-            periods.map((period) {
-              Color color = Colors.grey;
-              if (period.type == 'ម៉ោងមង្គលហេង') color = Colors.green;
-              if (period.type == 'ម៉ោងឡាក់ឆុង') color = Colors.red;
-
-              return DataRow(
-                cells: [
-                  DataCell(
-                    Text(period.period, style: const TextStyle(fontSize: 12)),
-                  ),
-                  DataCell(
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: color.withOpacity(0.5)),
-                      ),
-                      child: Text(
-                        period.type,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 12,
-                          fontFamily:
-                              'Dangrek', // <-- Add your font family here
-                        ),
-                      ),
-                    ),
-                  ),
-                  DataCell(
-                    Text(
-                      period.description,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
-      ),
-    );
+  // Keep only these essential methods:
+  double _calculateTotalScore(Lunar lunar, String period) {
+    return _getHourClashScore(lunar, period) * 0.4 +
+        _getDeityScore(lunar, period) * 0.3 +
+        _getElementScore(lunar, period) * 0.2 +
+        _getConstellationScore(lunar) * 0.1;
   }
+
+  double _getHourClashScore(Lunar lunar, String period) {
+    final hourBranch = _getHourBranch(period);
+    final dayBranch = lunar.getDayInGanZhi().substring(1);
+
+    final clashes = {
+      "子": "午", "丑": "未", "寅": "申", "卯": "酉",
+      "辰": "戌", "巳": "亥", "午": "子", "未": "丑",
+      "申": "寅", "酉": "卯", "戌": "辰", "亥": "巳"
+    };
+
+    final harmonies = {
+      "子": ["丑"], "寅": ["亥"], "卯": ["戌"],
+      "辰": ["酉"], "巳": ["申"], "午": ["未"]
+    };
+
+    if (clashes[dayBranch] == hourBranch) return -2.0;
+    if (harmonies[dayBranch]?.contains(hourBranch) ?? false) return 1.5;
+    return 0.0;
+  }
+
+  // 2. Deity Influence Calculation
+  double _getDeityScore(Lunar lunar, String period) {
+    final hourBranch = _getHourBranch(period);
+    final dayGanZhi = lunar.getDayInGanZhi();
+
+    // Sample deity database - should be expanded
+    final deityDatabase = {
+      "甲子": {"子": 1.2, "午": -1.5},
+      "乙丑": {"丑": 1.0, "未": -1.2},
+      // ... complete for all 60 dayGanZhi combinations
+    };
+
+    return deityDatabase[dayGanZhi]?[hourBranch] ?? 0.0;
+  }
+
+  // 3. Five Elements Compatibility
+  double _getElementScore(Lunar lunar, String period) {
+    final dayStem = lunar.getDayGan();
+    final hourBranch = _getHourBranch(period);
+
+    final elementRelations = {
+      "Wood": {"Water": 1.0, "Fire": -0.5, "Metal": -1.0},
+      "Fire": {"Wood": 1.0, "Earth": 0.5, "Water": -1.0},
+      "Earth": {"Fire": 0.5, "Metal": 0.5, "Wood": -0.5},
+      "Metal": {"Earth": 0.5, "Water": 1.0, "Fire": -1.0},
+      "Water": {"Metal": 1.0, "Wood": 0.5, "Earth": -1.0}
+    };
+
+    final dayElement = _getStemElement(dayStem);
+    final hourElement = _getBranchElement(hourBranch);
+
+    return elementRelations[dayElement]?[hourElement] ?? 0.0;
+  }
+
+  // 4. Constellation Influence
+  double _getConstellationScore(Lunar lunar) {
+    final constellation = lunar.getXiu();
+
+    const constellationEffects = {
+      "角": 0.8, "亢": 0.5, "氐": 0.3, "房": 1.0,
+      "心": -0.5, "尾": 0.7, "箕": 0.2,
+      // ... complete all 28 constellations
+    };
+
+    return constellationEffects[constellation] ?? 0.0;
+  }
+
+  // Helper Methods
+  String _getHourBranch(String period) {
+    const hourMap = {
+      "23:00-01:00": "子", "01:00-03:00": "丑",
+      "03:00-05:00": "寅", "05:00-07:00": "卯",
+      "07:00-09:00": "辰", "09:00-11:00": "巳",
+      "11:00-13:00": "午", "13:00-15:00": "未",
+      "15:00-17:00": "申", "17:00-19:00": "酉",
+      "19:00-21:00": "戌", "21:00-23:00": "亥"
+    };
+    return hourMap[period] ?? "";
+  }
+
+  String _getStemElement(String gan) {
+    const elementMap = {
+      "甲": "Wood", "乙": "Wood",
+      "丙": "Fire", "丁": "Fire",
+      "戊": "Earth", "己": "Earth",
+      "庚": "Metal", "辛": "Metal",
+      "壬": "Water", "癸": "Water"
+    };
+    return elementMap[gan] ?? "";
+  }
+
+  String _getBranchElement(String zhi) {
+    const elementMap = {
+      "子": "Water", "丑": "Earth", "寅": "Wood", "卯": "Wood",
+      "辰": "Earth", "巳": "Fire", "午": "Fire", "未": "Earth",
+      "申": "Metal", "酉": "Metal", "戌": "Earth", "亥": "Water"
+    };
+    return elementMap[zhi] ?? "";
+  }
+
+
+// ================== ENHANCED TIME TABLE ==================
+Widget _buildTimeTable(List<TimePeriod> periods) {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: DataTable(
+      columnSpacing: 16,
+      dataRowHeight: 48,
+      columns: const [
+        DataColumn(label: Text('ពេលវេលា', style: TextStyle(fontFamily: 'Dangrek', color: Colors.white))),
+        DataColumn(label: Text('ហេង/ឆុង', style: TextStyle(fontFamily: 'Dangrek', color: Colors.white))),
+      ],
+      rows: periods.map((period) {
+        // Visual styling
+        late final Color color;
+        late final IconData icon;
+        late final Color textColor;
+
+        switch (period.type) {
+          case 'ហេង':
+            color = Colors.green[50]!;  // Light green background
+            icon = Icons.thumb_up;
+            textColor = Colors.green[800]!;
+            break;
+          case 'ឆុង':
+            color = Colors.red[50]!;     // Light red background
+            icon = Icons.thumb_down;
+            textColor = Colors.red[800]!;
+            break;
+          case 'ធម្មតា':
+          default:
+            color = Colors.blue[50]!;    // Light blue background
+            icon = Icons.horizontal_rule;
+            textColor = Colors.blue[800]!;
+        }
+
+        return DataRow(
+          cells: [
+            DataCell(Text(period.period,
+                style: const TextStyle(fontFamily: 'Dangrek', color: Colors.white))), // First column font
+            DataCell(
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: textColor.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(icon, size: 14, color: textColor),
+                    const SizedBox(width: 4),
+                    Text(period.type,
+                        style: TextStyle(
+                            color: textColor,
+                            fontFamily: 'Dangrek',
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    ),
+  );
+}
+
 
   // Helper to get harmonious hour (六合)
   String? _getHarmoniousHour(String dayZhi) {
@@ -1215,12 +1367,12 @@ class _DateSelectionScreenState extends State<DateSelectionScreen>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.deepPurpleAccent.withOpacity(
+            color: Colors.deepPurpleAccent.withValues(alpha: 
               0.3,
             ), // Semi-transparent white
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withOpacity(0.3), // Light border
+              color: Colors.white.withValues(alpha: 0.3), // Light border
               width: 2.2,
             ),
           ),
