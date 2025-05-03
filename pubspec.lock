@@ -369,10 +369,10 @@ packages:
     dependency: "direct main"
     description:
       name: lunar
-      sha256: d917590ca1766147a6cb7deed3e0350031c08f9f6aeb3604f8d70c06e5307c67
+      sha256: "4ebb40c1647c5903fc67ff0be09a4ce90da79b482f0c78a8c727086a67375c37"
       url: "https://pub.dev"
     source: hosted
-    version: "1.7.4"
+    version: "1.7.5"
   matcher:
     dependency: transitive
     description:
