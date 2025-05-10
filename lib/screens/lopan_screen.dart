@@ -88,7 +88,24 @@ class _LopanScreenState extends State<LopanScreen> {
     } catch (e) {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('ថតអត់ជាប់ទេ: $e')),
+        SnackBar(
+          content: Text(
+            'ថតអត់ជាប់ទេ: $e',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Siemreap',
+              fontSize: 14.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.transparent,
+          width: 300,
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -109,7 +126,24 @@ class _LopanScreenState extends State<LopanScreen> {
     setState(() {
       _smoothedHeading = _heading ?? _smoothedHeading;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Compass calibrated!')),
+        SnackBar(
+          content: Text(
+            '✨ សារ៉េឡកែរួចហើយ ✨',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Siemreap',
+              fontSize: 14.0,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: Colors.transparent,
+          width: 300,
+          duration: const Duration(seconds: 2),
+        ),
       );
     });
   }

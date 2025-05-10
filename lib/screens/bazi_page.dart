@@ -238,7 +238,24 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
       // Check if the widget is still mounted before showing the SnackBar
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✨ បានថតហើយ! សូមផ្ញើរទៅលោកគ្រូ')),
+          SnackBar(
+            content: Text(
+              '✨ បានថតហើយ! សូមផ្ញើរទៅលោកគ្រូ ✨',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Siemreap',
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            backgroundColor: Colors.transparent,
+            width: 300,
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
@@ -246,7 +263,26 @@ class _BaziPageState extends State<BaziPage> with TickerProviderStateMixin {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('ថតមិនជាប់ទេ មានបញ្ហារ: $e')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(
+              'ថតមិនជាប់ទេ! សូមប្រាប់លោកគ្រូ',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Siemreap',
+                fontSize: 14.0,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            backgroundColor: Colors.transparent,
+            width: 300,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     }
   }

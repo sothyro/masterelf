@@ -426,7 +426,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                         Text(
                           result.fortuneType,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.yellow,
                             fontFamily: 'Dangrek',
@@ -437,7 +437,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                         Text(
                           "${result.chineseTitle} (${result.pinyin})",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'Dangrek',
@@ -470,7 +470,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                         Text(
                           '"${result.keyLine}"',
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 12,
                             color: Colors.white,
                             fontFamily: 'Dangrek',
                           ),
@@ -480,7 +480,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                         Text(
                           '"${result.keyLineTranslation}"',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 12,
                             fontStyle: FontStyle.italic,
                             color: Colors.white.withValues(alpha: 0.9),
                             fontFamily: 'Siemreap',
@@ -689,7 +689,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
 
           Positioned(
             right: 16.0,
-            bottom: 80.0,
+            bottom: 90.0,
             child:
                 (_isLoading ||
                         _isBuffering ||
@@ -787,7 +787,7 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                                             ).showSnackBar(
                                               const SnackBar(
                                                 content: Text(
-                                                  'Nothing can be done at the moment',
+                                                  'ធ្វើអ្វីមិនបានទេពេលនេះ ទេវតារវល់',
                                                 ),
                                                 duration: Duration(seconds: 2),
                                               ),
