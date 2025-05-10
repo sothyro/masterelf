@@ -731,7 +731,7 @@ final Map<int, FortuneResult> fortuneResults = {
     englishTitle: "The Forty-Second Lot",
     fortuneType: "上吉 \n ហេងណាស់",
     keyLine: "皇君圣后天颜喜，茅屋公卿宰相来",
-    keyLineTranslation: "រាជាធិបតីញញឹម; អ្នកមានឥទ្ធិពលមកអ្នក",
+    keyLineTranslation: "រាជាធិបតីញញឹម; អ្នកមានឥទ្ធិពលមកជួយអ្នក",
     prophecy: {
       "ស្នេហា": "ការស្រលាញ់មិនរំពឹងទុកពីមនុស្សមានឋានៈខ្ពស់",
       "ការងារ": "អ្នកណែនាំមានឥទ្ធិពលបង្ហាញខ្លួន",
