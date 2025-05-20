@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       {'title': '     💠 សៀវភៅយុគ9', 'url': 'https://period9.masterelf.vip/period9'},
     ],
     '🧧លាភហេងឆ្នាំថ្មី': [
-      {'title': '     💠 រាសីឆ្នាំទាំង12', 'url': 'https://period9.masterelf.vip/zodiac'},
+      {'title': '     💠 រាសីឆ្នាំទាំង12', 'url': 'https://zodiac2025.my.canva.site/'},
       {'title': '     💠 ដេគ័រកាត់ឆុង', 'url': 'https://period9.masterelf.vip/fengshuicure'},
     ],
     '☯️ម៉ាស្ទ័រអេល': [
