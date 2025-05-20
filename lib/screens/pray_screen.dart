@@ -28,8 +28,6 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
   int? _selectedIndex;
 
   final List<String> _playlistItems = [
-    "ក្រឡុកស៊ីមស៊ី",
-    "ក្រឡាប់ព្រះច័ន្ទ",
     "រៀបចំសែនព្រេន",
     "កាត់ឆុងលើករាសី",
   ];
@@ -37,8 +35,10 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
   // Updated video URLs
   final List<String> _videoUrls = [
     'assets/videos/pray.mp4', // Default video
-    'https://period9.masterelf.vip/app/period9/mindtreatment.mp4',
-    'https://period9.masterelf.vip/app/period9/blessing.mp4',
+    'assets/videos/pray.mp4'
+    'assets/videos/pray.mp4'
+    //'https://period9.masterelf.vip/app/period9/mindtreatment.mp4',
+    //'https://period9.masterelf.vip/app/period9/blessing.mp4',
   ];
 
   // Kau Cim game variables
@@ -80,20 +80,22 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
 
     // First load the default asset video
     _controller = VideoPlayerController.asset(_videoUrls[0])
-      ..initialize().then((_) {
-        setState(() {
-          _isLoading = false;
-        });
-        _controller.play();
-        _controller.setLooping(true);
+      ..initialize()
+          .then((_) {
+            setState(() {
+              _isLoading = false;
+            });
+            _controller.play();
+            _controller.setLooping(true);
 
-        // Now try to load the updated network video
-        _tryLoadNetworkVideo();
-      }).catchError((error) {
-        setState(() {
-          _isLoading = false;
-        });
-      });
+            // Now try to load the updated network video
+            _tryLoadNetworkVideo();
+          })
+          .catchError((error) {
+            setState(() {
+              _isLoading = false;
+            });
+          });
 
     _controller.addListener(_onVideoCompletion);
     _controller.addListener(_onBufferingUpdate);
@@ -126,7 +128,6 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
       }
     }
   }
-
 
   void _handleShake() {
     if (!_isGameAnimating) return;
@@ -199,7 +200,9 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
             ),
           ),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           backgroundColor: Colors.transparent,
           width: 300,
           duration: const Duration(seconds: 2),
@@ -219,7 +222,6 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
       });
     }
   }
-
 
   void _startAccelerometer() {
     accelerometerEventStream().listen((AccelerometerEvent event) {
@@ -524,7 +526,9 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                                     entry.value,
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.white.withValues(alpha: 0.9),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
                                       fontFamily: 'Siemreap',
                                     ),
                                   ),
@@ -575,6 +579,9 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomNavBarHeight = kBottomNavigationBarHeight + bottomPadding;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -687,21 +694,52 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
             ),
           ],
 
-          Positioned(
-            right: 16.0,
-            bottom: 90.0,
-            child:
-                (_isLoading ||
-                        _isBuffering ||
-                        !_isVideoAnimationCompleted ||
-                        !_showList)
-                    ? Container()
-                    : ClipRRect(
+          // Show buttons only when not in game mode and everything is loaded
+          if (!_showGame && !_isLoading && _isVideoAnimationCompleted && !_isBuffering)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: bottomNavBarHeight - 40,  // Reduced to 5 for closer positioning
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Left button - Kau Cim
+                    GestureDetector(
+                      onTap: _startGame,
+                      child: Container(
+                        width: 80,
+                        height: 100,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white.withValues(alpha: 0.3),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                            child: Image.asset(
+                              'assets/images/kaucim.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Center list - "រៀបពិធី" (always expanded)
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(12.0),
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                         child: Container(
                           width: 120.0,
+                          height: 100,
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12.0),
@@ -711,143 +749,172 @@ class _PrayScreenState extends State<PrayScreen> with TickerProviderStateMixin {
                             ),
                           ),
                           child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center, // Center items vertically
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isPlaylistExpanded = !_isPlaylistExpanded;
-                                  });
+                                onTap: () async {
+                                  try {
+                                    final videoUrl = 'assets/videos/pray.mp4';
+                                    final newController = VideoPlayerController.networkUrl(
+                                      Uri.parse(videoUrl),
+                                    );
+                                    await newController.initialize();
+
+                                    _controller.dispose();
+                                    _controller = newController;
+                                    setState(() {
+                                      _selectedIndex = 0;
+                                      _showGame = false;
+                                    });
+                                    _controller.play();
+                                    _controller.setLooping(true);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'ធ្វើអ្វីមិនបានទេពេលនេះ ទេវតារវល់',
+                                        ),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                    _replaceVideo(_videoUrls[0]);
+                                  }
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: const Text(
-                                    'រៀបពិធី',
-                                    style: TextStyle(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14.0, // Adjusted padding
+                                    horizontal: 12.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _selectedIndex == 0
+                                        ? Colors.yellow.withValues(alpha: 0.3)
+                                        : Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    _playlistItems[0],
+                                    style: const TextStyle(
                                       fontFamily: 'Dangrek',
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.yellow,
+                                      color: Colors.white,
+                                      fontSize: 14.0,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
                               ),
+                              Divider(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                height: 1,
+                                thickness: 1,
+                                indent: 16,
+                                endIndent: 16,
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  try {
+                                    final videoUrl = 'assets/videos/pray.mp4';
+                                    final newController = VideoPlayerController.networkUrl(
+                                      Uri.parse(videoUrl),
+                                    );
+                                    await newController.initialize();
 
-                              if (_isPlaylistExpanded)
-                                ListView.separated(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: _playlistItems.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      onTap: () async {
-                                        if (index == 0) {
-                                          _startGame(); // First item - Kau Cim game
-                                        } else if (index == 1) {
-                                          // Second item - Moon Blocks game
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder:
-                                                  (context) =>
-                                                      const MoonBlocksScreen(),
-                                            ),
-                                          );
-                                        } else {
-                                          // Handle special videos for index 2 and 3
-                                          try {
-                                            String videoUrl;
-                                            if (index == 2) {
-                                              videoUrl =
-                                                  'https://period9.masterelf.vip/app/period9/mindtreatment.mp4';
-                                            } else {
-                                              videoUrl =
-                                                  'https://period9.masterelf.vip/app/period9/blessing.mp4';
-                                            }
-
-                                            final newController =
-                                                VideoPlayerController.networkUrl(
-                                                  Uri.parse(videoUrl),
-                                                );
-                                            await newController.initialize();
-
-                                            _controller.dispose();
-                                            _controller = newController;
-                                            setState(() {
-                                              _selectedIndex = index;
-                                              _showGame = false;
-                                              _isPlaylistExpanded = false;
-                                            });
-                                            _controller.play();
-                                            _controller.setLooping(true);
-                                          } catch (e) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'ធ្វើអ្វីមិនបានទេពេលនេះ ទេវតារវល់',
-                                                ),
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                            // Continue playing default video
-                                            _replaceVideo(_videoUrls[0]);
-                                          }
-                                        }
-                                      },
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0,
-                                          horizontal: 12.0,
+                                    _controller.dispose();
+                                    _controller = newController;
+                                    setState(() {
+                                      _selectedIndex = 1;
+                                      _showGame = false;
+                                    });
+                                    _controller.play();
+                                    _controller.setLooping(true);
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'ធ្វើអ្វីមិនបានទេពេលនេះ ទេវតារវល់',
                                         ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              _selectedIndex == index
-                                                  ? Colors.yellow.withValues(
-                                                    alpha: 0.3,
-                                                  )
-                                                  : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                            4.0,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          _playlistItems[index],
-                                          style: const TextStyle(
-                                            fontFamily: 'Dangrek',
-                                            color: Colors.white,
-                                            fontSize: 14.0,
-                                          ),
-                                          textAlign: TextAlign.center,
-                                        ),
+                                        duration: Duration(seconds: 2),
                                       ),
                                     );
-                                  },
-                                  separatorBuilder: (context, index) {
-                                    // Add divider after the second item (index 1)
-                                    return index == 1
-                                        ? Divider(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.5,
-                                          ),
-                                          height: 1,
-                                          thickness: 1,
-                                          indent: 16,
-                                          endIndent: 16,
-                                        )
-                                        : const SizedBox.shrink();
-                                  },
+                                    _replaceVideo(_videoUrls[0]);
+                                  }
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14.0, // Adjusted padding
+                                    horizontal: 12.0,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _selectedIndex == 1
+                                        ? Colors.yellow.withValues(alpha: 0.3)
+                                        : Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    _playlistItems[1],
+                                    style: const TextStyle(
+                                      fontFamily: 'Dangrek',
+                                      color: Colors.white,
+                                      fontSize: 14.0,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
+                              ),
                             ],
                           ),
                         ),
                       ),
                     ),
-          ),
-        ],
+
+                    // Right button - Moon Blocks
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showGame = true;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MoonBlocksScreen(),
+                          ),
+                        ).then((_) {
+                          setState(() {
+                            _showGame = false;
+                          });
+                        });
+                      },
+                      child: Container(
+                        width: 80,
+                        height: 100,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white.withValues(alpha: 0.3),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            width: 1.0,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                            child: Image.asset(
+                              'assets/images/moon_blocks.png',
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),        ],
       ),
     );
   }

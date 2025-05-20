@@ -57,9 +57,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       _animationController.reset();
       _animationController.repeat(reverse: true);
 
-      // Play wave animation once when bottom nav item is pressed
-      _waveAnimationController.reset();
-      _waveAnimationController.forward();
+      // Only play wave animation if not Pray screen (index 0)
+      if (index != 0) {
+        _waveAnimationController.reset();
+        _waveAnimationController.forward();
+      }
     });
   }
 
@@ -143,41 +145,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         children: [
           _buildBackground(),
           _pages[_selectedIndex],
-          Positioned(
-            top: MediaQuery.of(context).padding.top - 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: _toggleMenu,
-                child: SizedBox(
-                  width: 200,
-                  height: 100,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Wave animation - now plays once when triggered
-                      SizedBox(
-                        width: 200,
-                        height: 100,
-                        child: Lottie.asset(
-                          'assets/jsons/wave.json',
-                          controller: _waveAnimationController,
-                          animate: false, // We'll control animation manually
+          // Only show menu and wave animation if not on Pray screen (index 0)
+          if (_selectedIndex != 0) ...[
+            Positioned(
+              top: MediaQuery.of(context).padding.top - 20,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: _toggleMenu,
+                  child: SizedBox(
+                    width: 200,
+                    height: 100,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Wave animation - now plays once when triggered
+                        SizedBox(
+                          width: 200,
+                          height: 100,
+                          child: Lottie.asset(
+                            'assets/jsons/wave.json',
+                            controller: _waveAnimationController,
+                            animate: false, // We'll control animation manually
+                          ),
                         ),
-                      ),
-                      // Static menu icon
-                      Image.asset(
-                        'assets/icons/menu.png',
-                        width: 150,
-                        height: 70,
-                      ),
-                    ],
+                        // Static menu icon
+                        Image.asset(
+                          'assets/icons/menu.png',
+                          width: 150,
+                          height: 70,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
           if (_isMenuOpen) ...[
             Positioned.fill(
               child: GestureDetector(
